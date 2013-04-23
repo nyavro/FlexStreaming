@@ -14,7 +14,7 @@
         <!-- Dependencies versions -->
         <!--<spring.version>3.1.3.RELEASE</spring.version>-->
         <!--<spring-integration.version>2.2.2.RELEASE</spring-integration.version>-->
-
+        <red5.version>0.8.0</red5.version>
         <slf4j.version>1.7.2</slf4j.version>
         <jackson.version>2.1.1</jackson.version>
     </properties>
@@ -94,10 +94,6 @@
     </reporting>
     <repositories>
         <repository>
-            <id>Red5</id>
-            <url>http://red5.googlecode.com/svn/repository</url>
-        </repository>
-        <repository>
             <id>repo1.maven.org</id>
             <url>http://repo1.maven.org/maven2</url>
         </repository>
@@ -114,29 +110,8 @@
     <dependencies>
         <dependency>
             <groupId>org.red5</groupId>
-            <artifactId>red5-server</artifactId>
-            <version>1.0</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.mina</groupId>
-                    <artifactId>mina-integration-jmx</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.mina</groupId>
-                    <artifactId>mina-integration-beans</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org</groupId>
-                    <artifactId>jaudiotagger</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.red5</groupId>
-            <artifactId>red5-client</artifactId>
-            <version>1.0</version>
+            <artifactId>red5</artifactId>
+            <version>${red5.version}</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
