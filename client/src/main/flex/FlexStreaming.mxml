@@ -32,6 +32,8 @@
             mic.setUseEchoSuppression(true);
             mic.setSilenceLevel(0);
             cam = Camera.getCamera();
+            cam.setQuality(65536,90);
+            cam.setMode(640,480,15);
         }
 
         private function init():void {

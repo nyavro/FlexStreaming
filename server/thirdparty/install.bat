@@ -1,0 +1,1 @@
+mvn install:install-file -Dfile=red5-0.8.0.jar -DpomFile=red5-0.8.0.pom
