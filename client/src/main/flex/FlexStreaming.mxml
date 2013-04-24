@@ -21,32 +21,55 @@
 
         private var count:int = 3;
 
+        private var cameraAccessGranted:Boolean = false;
+
 
         private var timeLeft:int;
+
+        private function ensureCameraPermissions() {
+            cam.addEventListener(StatusEvent.STATUS, cameraAccessAllowed);
+            var vid:Video = new Video();
+            vid.attachCamera(cam);
+        }
+
+        private function cameraAccessAllowed(event:StatusEvent):void {
+            switch (event.code) {
+                case "Camera.Muted":
+                    trace("User clicked Deny.");
+                    break;
+                case "Camera.Unmuted":
+                    Alert.show("Camera allowed");
+                    recordButton.enabled = true;
+                    break;
+            }
+        }
 
         private function connect():void {
             nc = new NetConnection();
             nc.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
             nc.connect(liveUrl);
+        }
+
+        private function init():void {
+            liveUrl = FlexGlobals.topLevelApplication.parameters.liveUrl;
+            streamName = FlexGlobals.topLevelApplication.parameters.streamName;
+            videoMaxDuration = FlexGlobals.topLevelApplication.parameters.videoMaxDuration;
             mic = Microphone.getMicrophone();
             mic.setUseEchoSuppression(true);
             mic.setSilenceLevel(0);
             cam = Camera.getCamera();
             cam.setQuality(65536,90);
             cam.setMode(640,480,15);
-        }
-
-        private function init():void {
-            this.video = new Video();
-            this.video.opaqueBackground = true;
-            this.videoContainer.video = video;
+            video = new Video();
+            video.opaqueBackground = true;
+            videoContainer.video = video;
         }
 
         private function startRecording():void {
             ns = new NetStream(nc);
-            ns.publish(streamName, "record");
             ns.attachAudio(mic);
             ns.attachCamera(cam);
+            ns.publish(streamName, "record");
             this.video.attachCamera(cam);
             this.recordButton.enabled = false;
             this.stopButton.enabled = true;
@@ -96,6 +119,7 @@
                 this.recordButton.enabled = true;
             }
             else {
+                this.recordButton.enabled = false;
                 mx.controls.Alert.show("Failed to connect!");
             }
         }
@@ -111,10 +135,8 @@
         }
 
         private function onReady():void {
-            liveUrl = FlexGlobals.topLevelApplication.parameters.liveUrl;
-            streamName = FlexGlobals.topLevelApplication.parameters.streamName;
-            videoMaxDuration = FlexGlobals.topLevelApplication.parameters.videoMaxDuration;
             init();
+            ensureCameraPermissions();
             connect();
         }
 
