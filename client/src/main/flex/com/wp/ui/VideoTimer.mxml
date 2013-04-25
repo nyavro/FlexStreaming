@@ -16,6 +16,11 @@
             timer.start();
         }
 
+        public function stop():void {
+            timerDisplay.visible = false;
+            timer.stop();
+        }
+
         private function displayTimeLeft(event:TimerEvent):void {
             timeLeft--;
             if(timeLeft==0) {

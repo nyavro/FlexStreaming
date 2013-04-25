@@ -68,6 +68,7 @@
 
         private function stopRecording():void {
             ns.close();
+            videoTimer.stop();
             this.video.attachCamera(null);
             this.recordButton.enabled = true;
             this.stopButton.enabled = false;
