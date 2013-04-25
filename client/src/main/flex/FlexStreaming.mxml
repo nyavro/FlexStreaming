@@ -2,7 +2,10 @@
 <s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
                xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:util="com.wp.ui.*">
     <fx:Script><![CDATA[
+        import com.wp.ui.CountDownSplash;
+
         import mx.controls.Alert;
+        import mx.controls.Image;
         import mx.core.FlexGlobals;
 
         private var camera:Camera;
@@ -16,8 +19,10 @@
         private var videoMaxDuration:int;
 
         private var cameraAccessGranted:Boolean = false;
+        private var timer:Timer;
+        private var thumbnails:Array = new Array();
 
-        private function ensureCameraPermissions() {
+        private function ensureCameraPermissions():void {
             cam.addEventListener(StatusEvent.STATUS, cameraAccessAllowed);
             var vid:Video = new Video();
             vid.attachCamera(cam);
@@ -51,19 +56,33 @@
             cam.setQuality(65536, 90);
             cam.setMode(640, 480, 15);
             video = new Video();
-            video.opaqueBackground = true;
+//            video.opaqueBackground = true;
+            video.opaqueBackground = false;
             videoContainer.video = video;
+            videoContainer.addChild(countDownSplash);
+        }
+
+        private function getThumbnail(event:TimerEvent):void {
+            var bitmapData:BitmapData = new BitmapData(video.width*0.45, video.height*0.45);
+            bitmapData.draw(video);
+            var bitmap:Bitmap = new Bitmap(bitmapData);
+            var image:Image = new Image();
+            image.source = bitmap;
+            thumbnails.push(image);
         }
 
         private function startRecording():void {
+            stopButton.enabled = true;
+            playButton.enabled = false;
             ns = new NetStream(nc);
             ns.attachAudio(mic);
             ns.attachCamera(cam);
             ns.publish(streamName, "record");
             this.video.attachCamera(cam);
-            this.recordButton.enabled = false;
-            this.stopButton.enabled = true;
             videoTimer.start(videoMaxDuration, stopRecording);
+            timer = new Timer(1000);
+            timer.start();
+            timer.addEventListener(TimerEvent.TIMER, getThumbnail);
         }
 
         private function stopRecording():void {
@@ -73,14 +92,26 @@
             this.recordButton.enabled = true;
             this.stopButton.enabled = false;
             this.playButton.enabled = true;
+            timer.stop();
+            playerSection.visible = false;
+            thumbnailsSection.visible = true;
+            thumbnail0.removeAllChildren();
+            thumbnail1.removeAllChildren();
+            thumbnail2.removeAllChildren();
+            thumbnail3.removeAllChildren();
+            if (thumbnails.length > 0) {
+                thumbnail0.addChild(thumbnails[(int)((thumbnails.length * 1) / 8)]);
+                thumbnail1.addChild(thumbnails[(int)((thumbnails.length * 3) / 8)]);
+                thumbnail2.addChild(thumbnails[(int)((thumbnails.length * 5) / 8)]);
+                thumbnail3.addChild(thumbnails[(int)((thumbnails.length * 7) / 8)]);
+            }
         }
 
-
         private function playRecording():void {
-            this.ns.play(streamName);
-
-            this.video.attachNetStream(ns);
-
+            playerSection.visible = true;
+            thumbnailsSection.visible = false;
+            ns.play(streamName);
+            video.attachNetStream(ns);
         }
 
         private function netStatusHandler(event:NetStatusEvent):void {
@@ -111,30 +142,48 @@
         }
 
         private function startEffect():void {
-            countDownSplash.start(startRecording);
+            recordButton.enabled = false;
+            playerSection.visible = true;
+            thumbnailsSection.visible = false;
+            countDownSplash.start(startRecording, 3);
         }
 
         private function uploadVideo():void {
             new VideoUploadHelper().upload();
         }
         ]]></fx:Script>
-    <mx:VBox id="box1"  horizontalAlign="center" width="100%" height="100%">
-        <s:SkinnableContainer id="box"  width="400" height="400" creationComplete="onReady()">
-            <mx:VBox horizontalAlign="center" verticalAlign="middle" width="100%" height="100%" x="0" y="0">
-                <util:VideoContainer id="videoContainer" height="100%" width="100%"/>
-            </mx:VBox>
-            <mx:VBox horizontalAlign="center" verticalAlign="middle" width="100%" height="100%">
-                <util:CountDownSplash id="countDownSplash" count="3"/>
-            </mx:VBox>
-            <mx:VBox horizontalAlign="left" verticalAlign="top" x="10" y="10">
-                <util:VideoTimer id="videoTimer"/>
-            </mx:VBox>
-        </s:SkinnableContainer>
-        <mx:HBox bottom="10" right="10">
-            <mx:Button id="recordButton" label="Record" fontSize="18" fontWeight="bold" enabled="false" click="startEffect()"/>
-            <mx:Button id="stopButton" label="Stop" fontSize="18" fontWeight="bold" enabled="false" click="stopRecording()"/>
-            <mx:Button id="playButton" label="Play" fontSize="18" fontWeight="bold" enabled="false" click="playRecording()"/>
-            <mx:Button id="uploadButton" label="Upload Video" fontSize="18" fontWeight="bold" enabled="true" click="uploadVideo()"/>
-        </mx:HBox>
-    </mx:VBox>
+    <s:SkinnableContainer>
+        <mx:VBox horizontalAlign="center">
+            <s:SkinnableContainer id="playerSection"  width="640" height="480" creationComplete="onReady()">
+                <mx:VBox horizontalAlign="center" verticalAlign="middle" width="100%" height="100%" x="0" y="0">
+                    <util:VideoContainer id="videoContainer" height="100%" width="100%"/>
+                </mx:VBox>
+                <mx:VBox horizontalAlign="center" backgroundAlpha="0" verticalAlign="middle" width="640" height="480">
+                    <util:CountDownSplash id="countDownSplash"/>
+                </mx:VBox>
+                <mx:VBox id="box2" horizontalAlign="left" verticalAlign="top" x="10" y="10">
+                    <util:VideoTimer id="videoTimer"/>
+                </mx:VBox>
+            </s:SkinnableContainer>
+            <mx:HBox verticalAlign="bottom" horizontalAlign="center">
+                <mx:Button id="recordButton" label="Record" fontSize="18" fontWeight="bold" enabled="false" click="startEffect()"/>
+                <mx:Button id="stopButton" label="Stop" fontSize="18" fontWeight="bold" enabled="false" click="stopRecording()"/>
+                <mx:Button id="playButton" label="Play" fontSize="18" fontWeight="bold" enabled="false" click="playRecording()"/>
+                <mx:Button id="uploadButton" label="Upload Video" fontSize="18" fontWeight="bold" enabled="true" click="uploadVideo()"/>
+            </mx:HBox>
+            <!--<mx:HScrollBar width="100%" height="100">-->
+
+            <!--</mx:HScrollBar>-->
+        </mx:VBox>
+        <mx:VBox id="thumbnailsSection" horizontalAlign="center" width="640" height="470" visible="false">
+            <mx:HBox width="100%" height="100%">
+                <mx:VBox id="thumbnail0"/>
+                <mx:VBox id="thumbnail1"/>
+            </mx:HBox>
+            <mx:HBox width="100%" height="100%">
+                <mx:VBox id="thumbnail2"/>
+                <mx:VBox id="thumbnail3"/>
+            </mx:HBox>
+        </mx:VBox>
+    </s:SkinnableContainer>
 </s:Application>

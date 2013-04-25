@@ -1,13 +1,14 @@
 <?xml version="1.0"?>
-<mx:Box xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:s="library://ns.adobe.com/flex/spark">
+<mx:Box xmlns:fx="http://ns.adobe.com/mxml/2009" alpha="0" xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:s="library://ns.adobe.com/flex/spark">
     <fx:Script><![CDATA[
         import mx.events.EffectEvent;
 
-        public var count:int;
+        private var count:int;
         private var callback:Function;
 
-        public function start(callback:Function):void {
+        public function start(callback:Function, count:int):void {
             this.callback = callback;
+			this.count = count;
             runCountDown();
         }
 
@@ -15,12 +16,10 @@
             if (count == 0) {
                 callback();
             } else {
-                countDown.alpha = 1;
-                countDown.scaleX = 2;
-                countDown.scaleY = 2;
+                this.alpha = 1;
                 countDown.text = count + "";
                 count--;
-                fadeOut.play([countDown]);
+                fadeOut.play([this]);
             }
         }
 
@@ -32,9 +31,7 @@
     <fx:Declarations>
         <s:Animate id="fadeOut" effectEnd="endEffectListener(event);" duration="1000">
             <s:SimpleMotionPath property="alpha" valueFrom="1" valueTo="0"/>
-            <s:SimpleMotionPath property="scaleX" valueFrom="2" valueTo="1.7"/>
-            <s:SimpleMotionPath property="scaleY" valueFrom="2" valueTo="1.7"/>
         </s:Animate>
     </fx:Declarations>
-    <mx:Text id="countDown" text="3" alpha="0" fontSize="120" color="#FF0000" selectable="false" scaleX="2" scaleY="2"/>
+    <mx:Text id="countDown" text="3" fontSize="120" color="#FF0000" selectable="false" scaleX="2" scaleY="2"/>
 </mx:Box>

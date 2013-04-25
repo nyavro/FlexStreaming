@@ -29,24 +29,17 @@ public class VideoContainer extends UIComponent
         addEventListener( Event.RESIZE, resizeHandler );
     }
 
-    /**
-     * Accept a Video object as source input.
-     * @param video Object displaying live or on-demand streaming video.
-     */
-    public function set video( video : Video ) : void
-    {
-        if ( _video != null )
-        {
-            removeChild( _video );
+    public function set video(video:Video):void {
+        if (_video != null) {
+            removeChild(_video);
         }
 
         _video = video;
 
-        if ( _video != null )
-        {
+        if (_video != null) {
             _video.width = width;
             _video.height = height;
-            addChild( _video );
+            addChild(_video);
         }
     }
 

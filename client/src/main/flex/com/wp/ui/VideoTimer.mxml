@@ -9,23 +9,22 @@
             this.timeLeft = duration;
             this.callback = callback;
 
-            timerDisplay.visible = true;
             timerDisplay.text = timeLeft + "";
             timer = new Timer(1000);
             timer.addEventListener(TimerEvent.TIMER, displayTimeLeft);
             timer.start();
+            visible = true;
         }
 
         public function stop():void {
-            timerDisplay.visible = false;
             timer.stop();
+            visible = false;
         }
 
         private function displayTimeLeft(event:TimerEvent):void {
             timeLeft--;
             if(timeLeft==0) {
-                timerDisplay.visible = false;
-                timer.stop();
+                stop();
                 callback();
             } else {
                 timerDisplay.text = timeLeft + "";
@@ -33,5 +32,5 @@
         }
 
         ]]></fx:Script>
-    <mx:Text id="timerDisplay" visible="false" color="#0FF000"/>
+    <mx:Text id="timerDisplay" color="#0FF000"/>
 </mx:Box>

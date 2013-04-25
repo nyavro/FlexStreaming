@@ -22,7 +22,7 @@
                 <version>4.2-beta</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <targetPlayer>11.2.202</targetPlayer>
+                    <targetPlayer>11.7.700.179</targetPlayer>
                     <sourceFile>FlexStreaming.mxml</sourceFile>
                 </configuration>
             </plugin>
