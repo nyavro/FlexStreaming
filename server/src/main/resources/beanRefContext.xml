@@ -8,7 +8,8 @@
 			<list>
 				<value>defaultContext.xml</value>
 				<value>red5-common.xml</value>
-				<value>red5-core.xml</value>				
+				<value>red5-core.xml</value>
+                <value>persistent.xml</value>
 			</list>
 		</constructor-arg>
 	</bean>
