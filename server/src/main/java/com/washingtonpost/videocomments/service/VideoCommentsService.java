@@ -16,6 +16,11 @@ public class VideoCommentsService {
         return videoComment.getId();
     }
 
+    public VideoComment loadComment(Long id) {
+        VideoComment comment = videoCommentsDao.load(id);
+        return comment;
+    }
+
 
     public void complete(Long id) {
         VideoComment videoComment = videoCommentsDao.load(id);
@@ -31,6 +36,7 @@ public class VideoCommentsService {
     public void setThumbnail(Long id, byte[] image) {
         VideoComment videoComment = videoCommentsDao.load(id);
     }
+
 
     public void setVideoCommentsDao(VideoCommentsDao videoCommentsDao) {
         this.videoCommentsDao = videoCommentsDao;
