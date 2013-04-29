@@ -4,6 +4,5 @@ CREATE TABLE VIDEO_COMMENTS (
   ID                        SERIAL CONSTRAINT VIDEO_COMMENTS_PK PRIMARY KEY,
   CREATED_AT                TIMESTAMP     NOT NULL,
   UPDATED_AT                TIMESTAMP     NOT NULL,
-  DISPLAY_NAME              VARCHAR(255),
   COMPLETE                  NUMERIC(1, 0)
 );

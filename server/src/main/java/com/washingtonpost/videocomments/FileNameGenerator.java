@@ -1,12 +1,19 @@
 package com.washingtonpost.videocomments;
 
+import com.google.common.base.Joiner;
+import org.red5.logging.Red5LoggerFactory;
+import org.red5.server.api.IConnection;
 import org.red5.server.api.IScope;
+import org.red5.server.api.Red5;
 import org.red5.server.api.ScopeUtils;
 import org.red5.server.api.stream.IStreamFilenameGenerator;
+import org.slf4j.Logger;
 
 import java.io.File;
 
 public class FileNameGenerator implements IStreamFilenameGenerator {
+
+    private Logger log = Red5LoggerFactory.getLogger(FileNameGenerator.class);
 
     /**
      * Generate stream directory based on relative scope path. The base directory is

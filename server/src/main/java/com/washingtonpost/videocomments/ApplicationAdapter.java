@@ -1,6 +1,8 @@
 package com.washingtonpost.videocomments;
 
 
+import com.google.common.base.Joiner;
+import com.washingtonpost.videocomments.service.VideoCommentsService;
 import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.adapter.IApplication;
 import org.red5.server.adapter.MultiThreadedApplicationAdapter;
@@ -13,26 +15,28 @@ public class ApplicationAdapter extends MultiThreadedApplicationAdapter{
 
     private Logger log = Red5LoggerFactory.getLogger(ApplicationAdapter.class);
 
-    private IApplication listener;
-
-    public void register() {
-        this.addListener(listener);
-    }
-
-    public void setListener(IApplication listener) {
-        this.listener = listener;
-    }
+    private VideoCommentsService videoCommentsService;
 
     public void streamRecordStart(IBroadcastStream stream) {
+        Long streamId = videoCommentsService.createNewComment();
+
         IConnection connection = Red5.getConnectionLocal();
-        log.debug("Start stream");
+        connection.setAttribute("streamId", streamId);
+        log.debug("Start stream " + streamId);
         super.streamRecordStart(stream);
     }
 
     public void streamBroadcastClose(IBroadcastStream stream) {
         // log w3c connect event
-        IConnection conn = Red5.getConnectionLocal();
+        IConnection connection = Red5.getConnectionLocal();
         log.debug("Stop stream");
         super.streamBroadcastClose(stream);
+
+        Long streamId = (Long) connection.getAttribute("streamId");
+        videoCommentsService.complete(streamId);
+    }
+
+    public void setVideoCommentsService(VideoCommentsService videoCommentsService) {
+        this.videoCommentsService = videoCommentsService;
     }
 }

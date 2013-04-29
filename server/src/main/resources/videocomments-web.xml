@@ -3,12 +3,9 @@
 <beans>
 
 
-    <bean id="videocommentsListener" class="com.washingtonpost.videocomments.VideoCommentsApplication">
 
-    </bean>
-
-    <bean id="web.handler.videocomments" class="com.washingtonpost.videocomments.ApplicationAdapter" init-method="register">
-        <property name="listener" ref="videocommentsListener" />
+    <bean id="web.handler.videocomments" class="com.washingtonpost.videocomments.ApplicationAdapter">
+        <property name="videoCommentsService" ref="videoCommentsService" />
     </bean>
 
 	<!-- ROOT web context -->

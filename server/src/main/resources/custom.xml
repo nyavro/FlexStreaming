@@ -8,4 +8,8 @@
     <bean id="streamFilenameGenerator" class="com.washingtonpost.videocomments.FileNameGenerator">
     </bean>
 
+    <bean id="videoCommentsService" class="com.washingtonpost.videocomments.service.VideoCommentsService">
+        <property name="videoCommentsDao" ref="videoCommentsDao" />
+    </bean>
+
 </beans>
