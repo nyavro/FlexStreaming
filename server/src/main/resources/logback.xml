@@ -4,11 +4,11 @@
 	<!-- Appenders http://logback.qos.ch/manual/appenders.html -->
 	<appender name="CONSOLE"
 		class="ch.qos.logback.core.ConsoleAppender">
-		<filter class="ch.qos.logback.classic.filter.LevelFilter">
-      		<level>INFO</level>
-      		<onMatch>ACCEPT</onMatch>
-      		<onMismatch>DENY</onMismatch>
-    	</filter>		
+		<!--<filter class="ch.qos.logback.classic.filter.LevelFilter">-->
+      		<!--<level>INFO</level>-->
+      		<!--<onMatch>ACCEPT</onMatch>-->
+      		<!--<onMismatch>DENY</onMismatch>-->
+    	<!--</filter>		-->
 		<layout class="ch.qos.logback.classic.PatternLayout">
 			<Pattern>		
 			%date [%thread] %-5level %logger - %msg%n
@@ -47,7 +47,11 @@
 		<appender-ref ref="CONSOLE" />
 		<appender-ref ref="FILE" />
 		<appender-ref ref="ERRORFILE" />
-	</root>	<!-- Red5 -->
+	</root>
+    <logger name="com.washingtonpost.videocomments">
+        <level value="DEBUG" />
+    </logger>
+    <!-- Red5 -->
 	<logger name="org.red5.io">
 		<level value="INFO" />
 	</logger>
@@ -131,8 +135,12 @@
 		<level value="WARN" />
 	</logger>
 	<logger name="org.red5.server.stream">
-		<level value="INFO" />
+		<level value="DEBUG" />
 	</logger>
+    <logger name="org.red5.server.adapter">
+        <level value="DEBUG" />
+    </logger>
+
     <logger name="org.red5.server.stream.consumer">
         <level value="WARN" />
     </logger>
@@ -146,7 +154,8 @@
 	<!-- Mina -->			
 	<logger name="org.apache.mina">
 		<level value="WARN" />
-	</logger>		<logger name="org.apache.mina.filter">
+	</logger>	
+	<logger name="org.apache.mina.filter">
 		<level value="WARN" />
 	</logger>
 	<logger name="org.apache.mina.filter.thread.ThreadPoolFilter">
