@@ -45,7 +45,7 @@ public class FileNameGenerator implements IStreamFilenameGenerator {
      * {@inheritDoc}
      */
     public String generateFilename(IScope scope, String name, String extension, GenerationType type) {
-        String result = getStreamDirectory(scope) + name;
+        String result = getStreamDirectory(scope) + File.separator + name;
         if (extension != null && !extension.equals("")) {
             result += extension;
         }
