@@ -18,11 +18,11 @@ public class ApplicationAdapter extends MultiThreadedApplicationAdapter{
     private VideoCommentsService videoCommentsService;
 
     public void streamRecordStart(IBroadcastStream stream) {
-        Long streamId = videoCommentsService.createNewComment();
+//        Long streamId = videoCommentsService.createNewComment();
 
         IConnection connection = Red5.getConnectionLocal();
-        connection.setAttribute("streamId", streamId);
-        log.debug("Start stream " + streamId);
+//        connection.setAttribute("streamId", streamId);
+//        log.debug("Start stream " + streamId);
         super.streamRecordStart(stream);
     }
 
@@ -32,8 +32,8 @@ public class ApplicationAdapter extends MultiThreadedApplicationAdapter{
         log.debug("Stop stream");
         super.streamBroadcastClose(stream);
 
-        Long streamId = (Long) connection.getAttribute("streamId");
-        videoCommentsService.complete(streamId);
+//        Long streamId = (Long) connection.getAttribute("streamId");
+//        videoCommentsService.complete(streamId);
     }
 
     public void setVideoCommentsService(VideoCommentsService videoCommentsService) {
