@@ -1,10 +1,3 @@
-/**
- * Created with IntelliJ IDEA.
- * User: eny
- * Date: 4/24/13
- * Time: 4:12 PM
- * To change this template use File | Settings | File Templates.
- */
 package {
 import flash.events.Event;
 import flash.events.ProgressEvent;
@@ -16,11 +9,15 @@ public class VideoUploadHelper {
 
     private static const videoTypes:Array = [new FileFilter("Video files", "*.flv;*.mp4;*.mpg;*.avi")];
     private var fileReference:FileReference = new FileReference();
+    private var url:String;
+    private var id:String;
 
-    public function VideoUploadHelper() {
+    public function VideoUploadHelper(url:String, id:String) {
         fileReference.addEventListener(Event.SELECT, selectionHandler);
         fileReference.addEventListener(Event.COMPLETE, uploadCompletionHandler);
         fileReference.addEventListener(ProgressEvent.PROGRESS, progressHandler);
+        this.url = url;
+        this.id = id;
     }
 
     public function upload() {
@@ -28,13 +25,10 @@ public class VideoUploadHelper {
     }
 
     private function progressHandler(event:ProgressEvent):void {
-
     }
 
     private function selectionHandler(event:Event):void {
-        var request:URLRequest = new URLRequest();
-        //TODO: make configurable
-        request.url = "http://localhost/api/upload";
+        var request:URLRequest = new URLRequest(url + "/video?id=" + id);
         fileReference.upload(request);
     }
 

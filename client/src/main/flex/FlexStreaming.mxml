@@ -168,7 +168,7 @@
         }
 
         private function uploadVideo():void {
-            new VideoUploadHelper().upload();
+            new VideoUploadHelper(servletUrl, videoId).upload();
         }
 
         private function finishComment():void {

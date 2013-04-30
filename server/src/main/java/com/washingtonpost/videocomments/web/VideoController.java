@@ -93,8 +93,7 @@ public class VideoController {
     }
 
     @RequestMapping(value = "/video", method = RequestMethod.POST)
-    public void video(MultiPartFileUpload fileUpload, HttpServletResponse response) throws IOException {
-        Long id = fileUpload.getId();
+    public void video(@RequestParam("id") long id, MultiPartFileUpload fileUpload, HttpServletResponse response) throws IOException {
         VideoComment comment = videoCommentsService.loadComment(id);
         if (comment.isComplete()) {
             throw new IllegalArgumentException("Is complete");
