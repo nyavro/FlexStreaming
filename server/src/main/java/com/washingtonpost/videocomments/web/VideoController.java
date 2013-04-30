@@ -85,7 +85,10 @@ public class VideoController {
     @RequestMapping(value = "/thumbnail", method = RequestMethod.POST)
     public void thumbnail(MultiPartFileUpload fileUpload, HttpServletResponse response) throws IOException {
         Long id = fileUpload.getId();
-        checkComment(id);
+        VideoComment comment = videoCommentsService.loadComment(id);
+        if (comment.isComplete()) {
+            throw new IllegalArgumentException("Is complete");
+        }
         File file = new File(videoCommentsService.getPath(), id + ".jpg");
         fileUpload.getFile().transferTo(file);
     }
@@ -93,7 +96,10 @@ public class VideoController {
     @RequestMapping(value = "/video", method = RequestMethod.POST)
     public void video(MultiPartFileUpload fileUpload, HttpServletResponse response) throws IOException {
         Long id = fileUpload.getId();
-        checkComment(id);
+        VideoComment comment = videoCommentsService.loadComment(id);
+        if (comment.isComplete()) {
+            throw new IllegalArgumentException("Is complete");
+        }
         File file = new File(videoCommentsService.getPath(), id + ".flv");
         fileUpload.getFile().transferTo(file);
     }

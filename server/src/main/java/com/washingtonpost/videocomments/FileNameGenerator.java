@@ -5,11 +5,22 @@ import org.red5.server.api.IScope;
 import org.red5.server.api.stream.IStreamFilenameGenerator;
 import org.slf4j.Logger;
 
+import java.io.File;
+
 public class FileNameGenerator implements IStreamFilenameGenerator {
 
     private Logger log = Red5LoggerFactory.getLogger(FileNameGenerator.class);
 
     private String path;
+
+    public void init() {
+        File file = new File(path);
+        if (!file.exists()) {
+            if (!file.mkdirs()) {
+                throw new RuntimeException("Can't create directory for video:" + file.getAbsolutePath());
+            }
+        }
+    }
 
     /**
      * Generate stream directory based on relative scope path. The base directory is
