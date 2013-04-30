@@ -81,6 +81,22 @@ public class VideoController {
     }
 
 
+    @RequestMapping(value = "/thumbnail", method = RequestMethod.POST)
+    public void thumbnail(MultiPartFileUpload fileUpload, HttpServletResponse response) throws IOException {
+        Long id = fileUpload.getId();
+        checkComment(id);
+        File file = new File(path, id + ".jpg");
+        fileUpload.getFile().transferTo(file);
+    }
+
+    @RequestMapping(value = "/video", method = RequestMethod.POST)
+    public void video(MultiPartFileUpload fileUpload, HttpServletResponse response) throws IOException {
+        Long id = fileUpload.getId();
+        checkComment(id);
+        File file = new File(path, id + ".flv");
+        fileUpload.getFile().transferTo(file);
+    }
+
 //    @ExceptionHandler(Exception.class)
 //    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 //    public void serviceExceptionHandler(Exception e, HttpServletResponse response) throws IOException {
