@@ -7,7 +7,6 @@
         import com.wp.RemotingConnection;
         import com.wp.services.CommunicationService;
         import com.wp.services.ThumbnailsExtractorService;
-        import com.wp.ui.CountDownSplash;
         import com.wp.ui.EmbedCodeWindow;
         import com.wp.utils.EmbedCodeGenerator;
 
@@ -15,6 +14,7 @@
         import mx.controls.Image;
         import mx.core.FlexGlobals;
         import mx.graphics.codec.JPEGEncoder;
+        import mx.managers.PopUpManager;
 
         import org.osmf.events.TimeEvent;
 
@@ -172,15 +172,17 @@
         }
 
         private function finishComment():void {
-            new EmbedCodeWindow(this).showEmbedCode(EmbedCodeGenerator.generateCode(videoId, embedUrlTemplate, embedWidth, embedHeight), switchToDone);
             communicationService.complete(videoId);
+            var wind:EmbedCodeWindow = new EmbedCodeWindow();
+            wind.embedCode = EmbedCodeGenerator.generateCode(videoId, embedUrlTemplate, embedWidth, embedHeight);
+            PopUpManager.addPopUp(wind, this, true);
+            PopUpManager.centerPopUp(wind);
             currentState = 'done';
         }
 
         protected function vpCompleteHandler(event:TimeEvent):void {
             switchToDone();
         }
-
         ]]></fx:Script>
     <s:states>
         <s:State name="start"/>
