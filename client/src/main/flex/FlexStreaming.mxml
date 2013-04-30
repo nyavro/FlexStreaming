@@ -2,11 +2,18 @@
 <s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
                xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:util="com.wp.ui.*">
     <fx:Script><![CDATA[
+        import com.wp.RemotingConnection;
+        import com.wp.services.CommunicationService;
+        import com.wp.services.ThumbnailsExtractorService;
         import com.wp.ui.CountDownSplash;
+        import com.wp.ui.EmbedCodeWindow;
 
         import mx.controls.Alert;
         import mx.controls.Image;
         import mx.core.FlexGlobals;
+        import mx.graphics.codec.JPEGEncoder;
+
+        import org.osmf.events.TimeEvent;
 
         private var camera:Camera;
         private var mic:Microphone;
@@ -15,12 +22,15 @@
         private var ns:NetStream;
         private var video:Video;
         private var liveUrl:String;
-        private var streamName:String;
         private var videoMaxDuration:int;
 
         private var cameraAccessGranted:Boolean = false;
-        private var timer:Timer;
-        private var thumbnails:Array = new Array();
+        private var thumbnailsExtractorService:ThumbnailsExtractorService;
+        private var communicationService:CommunicationService;
+        private var videoId:String;
+        private var embedWidth:int;
+        private var embedHeight:int;
+        private var embedUrlTemplate:String;
 
         private function ensureCameraPermissions():void {
             cam.addEventListener(StatusEvent.STATUS, cameraAccessAllowed);
@@ -47,7 +57,9 @@
 
         private function init():void {
             liveUrl = FlexGlobals.topLevelApplication.parameters.liveUrl;
-            streamName = FlexGlobals.topLevelApplication.parameters.streamName;
+            embedWidth = FlexGlobals.topLevelApplication.parameters.embedWidth;
+            embedHeight = FlexGlobals.topLevelApplication.parameters.embedHeight;
+            embedUrlTemplate = FlexGlobals.topLevelApplication.parameters.embedUrlTemplate;
             videoMaxDuration = FlexGlobals.topLevelApplication.parameters.videoMaxDuration;
             mic = Microphone.getMicrophone();
             mic.setUseEchoSuppression(true);
@@ -60,15 +72,8 @@
             video.opaqueBackground = false;
             videoContainer.video = video;
             videoContainer.addChild(countDownSplash);
-        }
-
-        private function getThumbnail(event:TimerEvent):void {
-            var bitmapData:BitmapData = new BitmapData(video.width*0.45, video.height*0.45);
-            bitmapData.draw(video);
-            var bitmap:Bitmap = new Bitmap(bitmapData);
-            var image:Image = new Image();
-            image.source = bitmap;
-            thumbnails.push(image);
+            thumbnailsExtractorService = new ThumbnailsExtractorService(video);
+            communicationService = new CommunicationService('http://localhost:5080/gateway');
         }
 
         private function startRecording():void {
@@ -77,12 +82,10 @@
             ns = new NetStream(nc);
             ns.attachAudio(mic);
             ns.attachCamera(cam);
-            ns.publish(streamName, "record");
+            ns.publish(videoId, "record");
             this.video.attachCamera(cam);
             videoTimer.start(videoMaxDuration, stopRecording);
-            timer = new Timer(1000);
-            timer.start();
-            timer.addEventListener(TimerEvent.TIMER, getThumbnail);
+            thumbnailsExtractorService.start();
         }
 
         private function stopRecording():void {
@@ -92,25 +95,61 @@
             this.recordButton.enabled = true;
             this.stopButton.enabled = false;
             this.playButton.enabled = true;
-            timer.stop();
             playerSection.visible = false;
             thumbnailsSection.visible = true;
-            thumbnail0.removeAllChildren();
-            thumbnail1.removeAllChildren();
-            thumbnail2.removeAllChildren();
-            thumbnail3.removeAllChildren();
+            updateThumbnails(thumbnailsExtractorService.stop());
+        }
+
+        private function updateThumbnails(thumbnails:Array):void {
+            var thumbnails:Array = thumbnailsExtractorService.stop();
             if (thumbnails.length > 0) {
-                thumbnail0.addChild(thumbnails[(int)((thumbnails.length * 1) / 8)]);
-                thumbnail1.addChild(thumbnails[(int)((thumbnails.length * 3) / 8)]);
-                thumbnail2.addChild(thumbnails[(int)((thumbnails.length * 5) / 8)]);
-                thumbnail3.addChild(thumbnails[(int)((thumbnails.length * 7) / 8)]);
+                thumbnail0.source = new Bitmap(thumbnails[(int)((thumbnails.length * 1) / 8)]);
+                thumbnail1.source = new Bitmap(thumbnails[(int)((thumbnails.length * 3) / 8)]);
+                thumbnail2.source = new Bitmap(thumbnails[(int)((thumbnails.length * 5) / 8)]);
+                thumbnail3.source = new Bitmap(thumbnails[(int)((thumbnails.length * 7) / 8)]);
             }
         }
 
-        private function playRecording():void {
+        private function encodeToJPEG(data:BitmapData, quality:Number = 75):ByteArray {
+            return new JPEGEncoder(quality).encode(data);
+        }
+
+        private function submitThumbnail(image:Image):void {
+            communicationService.setThumbnail(videoId, encodeToJPEG((image.source as Bitmap).bitmapData));
+            showEmbedCode(videoId);
+            currentState = 'done';
+        }
+
+        private function showEmbedCode(videoId:String):void {
+            new EmbedCodeWindow(this).showEmbedCode(communicationService.getEmbedCode(videoId), done);
+        }
+
+        private function done():void {
+            this.recordButton.enabled = true;
+            this.stopButton.enabled = false;
+            this.playButton.enabled = true;
+            videoPlayer.visible = false;
             playerSection.visible = true;
             thumbnailsSection.visible = false;
-            ns.play(streamName);
+        }
+
+        private function onEnterStartState():void {
+//            new AsyncCall(
+//                    "http://localhost:8080/api/generateId",
+//                    function (videoId:String):void {
+//                        this.videoId = videoId;
+//                        streamingService = new StreamingService(liveUrl, videoId, cam, mic);
+//                    }
+//            ).run();
+            videoId = communicationService.generateId();
+//            streamingService = new StreamingService(liveUrl, videoId, cam, mic);
+        }
+
+        private function playRecording():void {
+            //player.source = "http://media.w3.org/2010/05/sintel/trailer.mp4";
+            playerSection.visible = true;
+            thumbnailsSection.visible = false;
+            ns.play(videoId);
             video.attachNetStream(ns);
         }
 
@@ -125,20 +164,20 @@
             }
         }
 
-
-        private function onMicStatus(event:StatusEvent):void {
-            if (event.code == "Microphone.Unmuted") {
-                Alert.show("Microphone access was allowed.");
-            }
-            else if (event.code == "Microphone.Muted") {
-                Alert.show("Microphone access was denied.");
-            }
-        }
+//        private function onMicStatus(event:StatusEvent):void {
+//            if (event.code == "Microphone.Unmuted") {
+//                Alert.show("Microphone access was allowed.");
+//            }
+//            else if (event.code == "Microphone.Muted") {
+//                Alert.show("Microphone access was denied.");
+//            }
+//        }
 
         private function onReady():void {
             init();
             ensureCameraPermissions();
             connect();
+            videoId = communicationService.generateId();
         }
 
         private function startEffect():void {
@@ -151,7 +190,19 @@
         private function uploadVideo():void {
             new VideoUploadHelper().upload();
         }
+
+        protected function vpCompleteHandler(event:TimeEvent):void {
+            done();
+        }
+
         ]]></fx:Script>
+    <s:states>
+        <s:State name="start" enterState="onEnterStartState()"/>
+        <s:State name="record"/>
+        <s:State name="selectThumbnail" enterState="Alert.show('selectTh')"/>
+        <s:State name="play"/>
+        <s:State name="done"/>
+    </s:states>
     <s:SkinnableContainer>
         <mx:VBox horizontalAlign="center">
             <s:SkinnableContainer id="playerSection"  width="640" height="480" creationComplete="onReady()">
@@ -171,18 +222,23 @@
                 <mx:Button id="playButton" label="Play" fontSize="18" fontWeight="bold" enabled="false" click="playRecording()"/>
                 <mx:Button id="uploadButton" label="Upload Video" fontSize="18" fontWeight="bold" enabled="true" click="uploadVideo()"/>
             </mx:HBox>
-            <!--<mx:HScrollBar width="100%" height="100">-->
-
-            <!--</mx:HScrollBar>-->
         </mx:VBox>
         <mx:VBox id="thumbnailsSection" horizontalAlign="center" width="640" height="470" visible="false">
             <mx:HBox width="100%" height="100%">
-                <mx:VBox id="thumbnail0"/>
-                <mx:VBox id="thumbnail1"/>
+                <mx:Text text="Please choose thumbnail for your video:"/>
             </mx:HBox>
             <mx:HBox width="100%" height="100%">
-                <mx:VBox id="thumbnail2"/>
-                <mx:VBox id="thumbnail3"/>
+                <mx:VBox click="submitThumbnail(thumbnail0)"><mx:Image id="thumbnail0"/></mx:VBox>
+                <mx:VBox click="submitThumbnail(thumbnail1)"><mx:Image id="thumbnail1"/></mx:VBox>
+            </mx:HBox>
+            <mx:HBox width="100%" height="100%">
+                <mx:VBox click="submitThumbnail(thumbnail2)"><mx:Image id="thumbnail2"/></mx:VBox>
+                <mx:VBox click="submitThumbnail(thumbnail3)"><mx:Image id="thumbnail3"/></mx:VBox>
+            </mx:HBox>
+        </mx:VBox>
+        <mx:VBox id="videoPlayer" horizontalAlign="center" width="640" height="470" visible="false">
+            <mx:HBox width="100%" height="100%">
+                <s:VideoPlayer id="player" complete="done"/>
             </mx:HBox>
         </mx:VBox>
     </s:SkinnableContainer>
