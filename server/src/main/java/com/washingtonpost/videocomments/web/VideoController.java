@@ -9,11 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 @Controller
 public class VideoController {
@@ -83,13 +81,26 @@ public class VideoController {
 
 
     @RequestMapping(value = "/thumbnail", method = RequestMethod.POST)
-    public void thumbnail(@RequestParam("id") long id, MultiPartFileUpload fileUpload, HttpServletResponse response) throws IOException {
+    public void thumbnail(@RequestParam("id") long id, HttpServletRequest request, HttpServletResponse response) throws IOException {
         VideoComment comment = videoCommentsService.loadComment(id);
         if (comment.isComplete()) {
             throw new IllegalArgumentException("Is complete");
         }
         File file = new File(videoCommentsService.getPath(), id + ".jpg");
-        fileUpload.getFile().transferTo(file);
+        if (file.exists()) {
+            file.delete();
+        }
+        if (!file.createNewFile()) {
+            throw new IllegalArgumentException("Can't create file " + file.getAbsolutePath());
+        }
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(file);
+            IOUtils.copy(request.getInputStream(), fileOutputStream);
+        } finally {
+            IOUtils.closeQuietly(fileOutputStream);
+        }
+        response.getWriter().write("OK");
     }
 
     @RequestMapping(value = "/video", method = RequestMethod.POST)
