@@ -11,6 +11,7 @@
 
     <bean id="videoCommentsService" class="com.washingtonpost.videocomments.service.VideoCommentsService">
         <property name="videoCommentsDao" ref="videoCommentsDao" />
+        <property name="path" value="${storage.path}"/>
     </bean>
 
 </beans>

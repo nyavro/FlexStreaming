@@ -6,16 +6,16 @@
         http://www.springframework.org/schema/beans/spring-beans-2.5.xsd http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <context:property-placeholder location="classpath:/videocomments.properties" />
-
     <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
 
     <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"/>
 
-    <!--<context:component-scan base-package="com.washingtonpost.videocomments.web"/>-->
-    <bean id="videoController" class="com.washingtonpost.videocomments.web.VideoController">
-        <property name="path" value="${storage.path}"/>
-    </bean>
+    <context:component-scan base-package="com.washingtonpost.videocomments.web"/>
+
+
+    <!--<bean id="videoController" class="com.washingtonpost.videocomments.web.VideoController">-->
+        <!--<property name="path" value="${storage.path}"/>-->
+    <!--</bean>-->
 
     <!-- Configure the multipart resolver -->
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">

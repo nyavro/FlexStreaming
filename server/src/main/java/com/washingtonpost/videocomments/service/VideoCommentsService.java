@@ -10,6 +10,8 @@ public class VideoCommentsService {
 
     private VideoCommentsDao videoCommentsDao;
 
+    private String path;
+
     public Long createNewComment() {
         VideoComment videoComment = new VideoComment();
         videoCommentsDao.create(videoComment);
@@ -41,5 +43,13 @@ public class VideoCommentsService {
 
     public void setVideoCommentsDao(VideoCommentsDao videoCommentsDao) {
         this.videoCommentsDao = videoCommentsDao;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getPath() {
+        return path;
     }
 }

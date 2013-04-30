@@ -3,6 +3,8 @@ package com.washingtonpost.videocomments.web;
 import com.washingtonpost.videocomments.model.VideoComment;
 import com.washingtonpost.videocomments.service.VideoCommentsService;
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,14 +15,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-//@Controller
+@Controller
 public class VideoController {
 
-    private String path;
-
+    @Autowired
     private VideoCommentsService videoCommentsService;
 
-    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @RequestMapping(value = "/create", method = RequestMethod.GET)
     public void create(HttpServletResponse response) throws IOException {
         Long id = videoCommentsService.createNewComment();
         response.getWriter().write(id.toString());
@@ -40,7 +41,7 @@ public class VideoController {
         }
         checkComment(id);
         response.setContentType("video/x-flv");
-        File file = new File(path + File.separator + id + ".flv");
+        File file = new File(videoCommentsService.getPath() + File.separator + id + ".flv");
         if (!file.exists()) {
             throw new RuntimeException("Not found");
         }
@@ -67,7 +68,7 @@ public class VideoController {
         }
         checkComment(id);
         response.setContentType("image/jpeg");
-        File file = new File(path + File.separator + id + ".jpg");
+        File file = new File(videoCommentsService.getPath() + File.separator + id + ".jpg");
         if (!file.exists()) {
             throw new RuntimeException("Not found");
         }
@@ -85,7 +86,7 @@ public class VideoController {
     public void thumbnail(MultiPartFileUpload fileUpload, HttpServletResponse response) throws IOException {
         Long id = fileUpload.getId();
         checkComment(id);
-        File file = new File(path, id + ".jpg");
+        File file = new File(videoCommentsService.getPath(), id + ".jpg");
         fileUpload.getFile().transferTo(file);
     }
 
@@ -93,7 +94,7 @@ public class VideoController {
     public void video(MultiPartFileUpload fileUpload, HttpServletResponse response) throws IOException {
         Long id = fileUpload.getId();
         checkComment(id);
-        File file = new File(path, id + ".flv");
+        File file = new File(videoCommentsService.getPath(), id + ".flv");
         fileUpload.getFile().transferTo(file);
     }
 
@@ -102,11 +103,6 @@ public class VideoController {
 //    public void serviceExceptionHandler(Exception e, HttpServletResponse response) throws IOException {
 //        logger.error("Error", e);
 //    }
-
-
-    public void setPath(String path) {
-        this.path = path;
-    }
 
     public void setVideoCommentsService(VideoCommentsService videoCommentsService) {
         this.videoCommentsService = videoCommentsService;
