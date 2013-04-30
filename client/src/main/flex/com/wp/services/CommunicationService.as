@@ -18,8 +18,14 @@ public class CommunicationService {
     }
 
     public function generateId():String {
+        //            new AsyncCall(
+//                    "http://localhost:8080/api/generateId",
+//                    function (videoId:String):void {
+//                        this.videoId = videoId;
+//                        streamingService = new StreamingService(liveUrl, videoId, cam, mic);
+//                    }
+//            ).run();
         trace("Generate ID");
-        Alert.show("remote call start");
         conn.call("RemoteClass.createNewComment", new Responder(idReceived, function ():void {Alert.show('Failure');}));
         return UIDUtil.createUID();
     }

@@ -15,6 +15,7 @@ public class VideoCommentsApplication implements IApplication {
     @Override
     public boolean appStart(IScope app) {
         log.debug("App start");
+
         return true;
     }
 

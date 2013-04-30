@@ -7,10 +7,13 @@
  */
 package com.wp.ui {
 import flash.display.DisplayObject;
+import flash.events.Event;
+import flash.events.MouseEvent;
 import flash.sampler.getSavedThis;
 
 import mx.containers.TitleWindow;
 import mx.controls.Alert;
+import mx.controls.Button;
 import mx.controls.Label;
 import mx.controls.Text;
 import mx.events.CloseEvent;
@@ -32,9 +35,13 @@ public class EmbedCodeWindow {
         titleWindow.height = 180;
         titleWindow.addEventListener(CloseEvent.CLOSE, onClose);
         titleWindow.addChild(label);
+        var button:Button = new Button();
+        button.label = "OK";
+        button.addEventListener(MouseEvent.CLICK, onClose);
+        titleWindow.addChild(button);
     }
 
-    private function onClose(event:CloseEvent):void {
+    private function onClose():void {
         PopUpManager.removePopUp(titleWindow);
         callback();
     }
