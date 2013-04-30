@@ -27,7 +27,7 @@ public class VideoController {
         response.getWriter().write(id.toString());
     }
 
-    @RequestMapping(value = "/complete", method = RequestMethod.POST)
+    @RequestMapping(value = "/complete", method = RequestMethod.GET)
     public void complete(@RequestParam("id") long id, HttpServletResponse response) throws IOException {
         videoCommentsService.complete(id);
         response.getWriter().write("OK");
@@ -83,8 +83,7 @@ public class VideoController {
 
 
     @RequestMapping(value = "/thumbnail", method = RequestMethod.POST)
-    public void thumbnail(MultiPartFileUpload fileUpload, HttpServletResponse response) throws IOException {
-        Long id = fileUpload.getId();
+    public void thumbnail(@RequestParam("id") long id, MultiPartFileUpload fileUpload, HttpServletResponse response) throws IOException {
         VideoComment comment = videoCommentsService.loadComment(id);
         if (comment.isComplete()) {
             throw new IllegalArgumentException("Is complete");

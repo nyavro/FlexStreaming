@@ -5,12 +5,15 @@
 		<script type="text/javascript">
 			
 			var flashvars = {};
-			flashvars.liveUrl = "rtmp://localhost/";
-            flashvars.streamName = "test";
+            var host = "localhost";
+            var applicationName = "videocomments";
+            var httpPort = "8080";
+			flashvars.liveUrl = "rtmp://" + host + "/";// + applicationName;
+            flashvars.servletUrl = "http://" + host + ":" + httpPort + "/" + applicationName + "/api";
             flashvars.videoMaxDuration = 30;
             flashvars.embedWidth = 480;
             flashvars.embedHeight = 270;
-            flashvars.embedUrlTemplate = "url";
+            flashvars.embedUrlTemplate = "http://" + host +  "/" + applicationName + ":" + httpPort + "/api/video?id={0}";
             var params = {};
 			params.menu = "false";
 			params.quality = "best";

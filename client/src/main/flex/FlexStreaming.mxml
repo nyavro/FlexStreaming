@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
-               xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:util="com.wp.ui.*" currentState="start">
+               xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:util="com.wp.ui.*">
     <fx:Script><![CDATA[
         import avmplus.finish;
 
@@ -9,6 +9,7 @@
         import com.wp.services.ThumbnailsExtractorService;
         import com.wp.ui.CountDownSplash;
         import com.wp.ui.EmbedCodeWindow;
+        import com.wp.utils.EmbedCodeGenerator;
 
         import mx.controls.Alert;
         import mx.controls.Image;
@@ -33,6 +34,7 @@
         private var embedWidth:int;
         private var embedHeight:int;
         private var embedUrlTemplate:String;
+        private var servletUrl:String;
 
         private function ensureCameraPermissions():void {
             cam.addEventListener(StatusEvent.STATUS, cameraAccessAllowed);
@@ -63,6 +65,7 @@
             embedHeight = FlexGlobals.topLevelApplication.parameters.embedHeight;
             embedUrlTemplate = FlexGlobals.topLevelApplication.parameters.embedUrlTemplate;
             videoMaxDuration = FlexGlobals.topLevelApplication.parameters.videoMaxDuration;
+            servletUrl = FlexGlobals.topLevelApplication.parameters.servletUrl;
             mic = Microphone.getMicrophone();
             mic.setUseEchoSuppression(true);
             mic.setSilenceLevel(0);
@@ -74,7 +77,7 @@
             videoContainer.video = video;
             videoContainer.addChild(countDownSplash);
             thumbnailsExtractorService = new ThumbnailsExtractorService(video);
-            communicationService = new CommunicationService('http://localhost:5080/gateway');
+            communicationService = new CommunicationService(servletUrl);
         }
 
         private function startRecording():void {
@@ -116,25 +119,14 @@
             currentState = 'done';
         }
 
-        private function done():void {
+        private function switchToDone():void {
+//            Alert.show("done");
             currentState = 'done';
-        }
-
-        private function onEnterStartState():void {
-            videoId = communicationService.generateId();
-//            streamingService = new StreamingService(liveUrl, videoId, cam, mic);
         }
 
         private function playRecording():void {
             currentState = 'play';
-//            videoDisplay.source = "http://media.w3.org/2010/05/sintel/trailer.mp4";//liveUrl + "/" + videoId;
             videoDisplay.source = liveUrl + "/" + videoId;
-//            playerSection.visible = true;
-//            thumbnailsSection.visible = false;
-//            ns.addEventListener(NetStatusEvent.NET_STATUS, streamStatusHandler);
-//            ns.play(videoId);
-//            video.attachNetStream(ns);
-
         }
 
         private function streamStatusHandler(event:NetStatusEvent):void {
@@ -163,7 +155,11 @@
             init();
             ensureCameraPermissions();
             connect();
-            videoId = communicationService.generateId();
+            communicationService.create(function (createdId:String):void {
+                videoId = createdId;
+//                Alert.show(videoId);
+                currentState = 'start';
+            });
         }
 
         private function startEffect():void {
@@ -176,17 +172,18 @@
         }
 
         private function finishComment():void {
-            new EmbedCodeWindow(this).showEmbedCode(communicationService.getEmbedCode(videoId), done);
+            new EmbedCodeWindow(this).showEmbedCode(EmbedCodeGenerator.generateCode(videoId, embedUrlTemplate, embedWidth, embedHeight), switchToDone);
+            communicationService.complete(videoId);
             currentState = 'done';
         }
 
         protected function vpCompleteHandler(event:TimeEvent):void {
-            done();
+            switchToDone();
         }
 
         ]]></fx:Script>
     <s:states>
-        <s:State name="start" enterState="onEnterStartState()"/>
+        <s:State name="start"/>
         <s:State name="record"/>
         <s:State name="selectThumbnail"/>
         <s:State name="play"/>
@@ -228,7 +225,7 @@
         </mx:VBox>
         <mx:VBox id="videoPlayer" includeIn="play" horizontalAlign="center" width="640" height="480">
             <mx:HBox width="100%" height="100%">
-                <s:VideoPlayer id="videoDisplay" autoPlay="true"   complete="done" width="640" height="480"/>
+                <s:VideoPlayer id="videoDisplay" autoPlay="true" complete="switchToDone();" width="640" height="480"/>
             </mx:HBox>
         </mx:VBox>
     </s:SkinnableContainer>
