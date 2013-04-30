@@ -35,6 +35,7 @@ public class VideoCommentsService {
 
     public void setThumbnail(Long id, byte[] image) {
         VideoComment videoComment = videoCommentsDao.load(id);
+
     }
 
 
