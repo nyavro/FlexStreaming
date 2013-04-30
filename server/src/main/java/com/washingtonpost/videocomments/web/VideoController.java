@@ -20,6 +20,19 @@ public class VideoController {
 
     private VideoCommentsService videoCommentsService;
 
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    public void create(HttpServletResponse response) throws IOException {
+        Long id = videoCommentsService.createNewComment();
+        response.getWriter().write(id.toString());
+    }
+
+    @RequestMapping(value = "/complete", method = RequestMethod.POST)
+    public void complete(@RequestParam("id") long id, HttpServletResponse response) throws IOException {
+        videoCommentsService.complete(id);
+        response.getWriter().write("OK");
+    }
+
+
     @RequestMapping(value = "/video", method = RequestMethod.GET)
     public void video(@RequestParam("id") long id, HttpServletResponse response) throws IOException {
         if (id < 0) {
