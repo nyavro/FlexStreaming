@@ -10,11 +10,27 @@
 
     <properties>
         <swf>video-comment-recorder-1.0.swf</swf>
+        <host>localhost</host>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>prod</id>
+            <properties>
+                <host>10.128.138.43</host>
+                <storage.path>storage</storage.path>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <sourceDirectory>src/main/flex</sourceDirectory>
-
+        <resources>
+            <resource>
+                <directory>html-template</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
 		        <groupId>org.sonatype.flexmojos</groupId>

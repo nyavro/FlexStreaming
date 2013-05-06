@@ -16,7 +16,7 @@
 		<property name="context" ref="web.context" />
 		<property name="handler" ref="global.handler" />
 		<property name="contextPath" value="/" />
-		<property name="virtualHosts" value="*,localhost, localhost:8080, 127.0.0.1:8080" />
+		<property name="virtualHosts" value="*,localhost, localhost:8080, 127.0.0.1:8080, 10.128.138.43" />
 	</bean>
 
 </beans>
