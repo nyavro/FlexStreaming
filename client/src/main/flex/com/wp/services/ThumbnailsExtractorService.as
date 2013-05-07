@@ -26,7 +26,7 @@ public class ThumbnailsExtractorService {
     }
 
     private function makeSnapshot(event:TimerEvent):void {
-        var bitmapData:BitmapData = new BitmapData(video.width*0.45, video.height*0.45);
+        var bitmapData:BitmapData = new BitmapData(video.width*0.4, video.height*0.4);
         bitmapData.draw(video);
         thumbnails.push(bitmapData);
     }

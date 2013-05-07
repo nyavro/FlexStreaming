@@ -4,6 +4,7 @@
         private var timer:Timer;
         private var timeLeft:int;
         private var callback:Function;
+        private var maxTime:int
 
         public function start(duration:int, callback:Function):void {
             this.timeLeft = duration;
@@ -13,12 +14,14 @@
             timer = new Timer(1000);
             timer.addEventListener(TimerEvent.TIMER, displayTimeLeft);
             timer.start();
-            visible = true;
         }
 
         public function stop():void {
             timer.stop();
-            visible = false;
+        }
+
+        public function recordedDuration():int {
+            return (1 + maxTime - timeLeft)*1000;
         }
 
         private function displayTimeLeft(event:TimerEvent):void {
@@ -31,6 +34,11 @@
             }
         }
 
+        public function set time(time:int):void {
+            maxTime = time;
+            timerDisplay.text = maxTime + "";
+        }
+
         ]]></fx:Script>
-    <mx:Text id="timerDisplay" color="#0FF000"/>
+    <mx:Text text="{maxTime}" id="timerDisplay" color="#FFFFFF" fontSize="40"/>
 </mx:Box>
