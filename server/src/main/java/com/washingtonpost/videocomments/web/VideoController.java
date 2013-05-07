@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.support.DefaultMultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -104,13 +105,20 @@ public class VideoController {
     }
 
     @RequestMapping(value = "/video", method = RequestMethod.POST)
-    public void video(@RequestParam("id") long id, MultiPartFileUpload fileUpload, HttpServletResponse response) throws IOException {
+    public void video(@RequestParam("id") long id, HttpServletRequest request, HttpServletResponse response) throws IOException {
         VideoComment comment = videoCommentsService.loadComment(id);
         if (comment.isComplete()) {
             throw new IllegalArgumentException("Is complete");
         }
         File file = new File(videoCommentsService.getPath(), id + ".flv");
-        fileUpload.getFile().transferTo(file);
+        OutputStream fileOutputStream = null;
+        try {
+            //HACK
+            fileOutputStream = new FileOutputStream(file);
+            IOUtils.copy(((DefaultMultipartHttpServletRequest) request).getFile("Filedata").getInputStream(), fileOutputStream);
+        } finally {
+            IOUtils.closeQuietly(fileOutputStream);
+        }
     }
 
 //    @ExceptionHandler(Exception.class)
