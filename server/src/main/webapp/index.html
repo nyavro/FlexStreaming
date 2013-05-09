@@ -1,0 +1,42 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+    </script>
+</head>
+</head>
+<input type="file" id="files" name="files[]" multiple />
+<output id="list"></output>
+
+<script>
+  function handleFileSelect(evt) {
+      var files = evt.target.files;
+          $.ajax({
+              url: 'http://192.168.1.242:8080/videocomments/api/video?id=3',
+              type: 'POST',
+              xhr: function() {
+                  var myXhr = $.ajaxSettings.xhr();
+                  if(myXhr.upload){
+                      //myXhr.upload.addEventListener('progress',progressHandlingFunction, false); // for handling the progress of the upload
+                  }
+                  return myXhr;
+              },
+              data: files[0],
+              cache: false,
+              contentType: false,
+              processData: false
+          });
+    var output = [];
+    for (var i = 0, f; f = files[i]; i++) {
+      output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
+                  f.size, ' bytes, last modified: ',
+                  f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+                  '</li>');
+    }
+    document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+  }
+
+  document.getElementById('files').addEventListener('change', handleFileSelect, false);
+</script>
+</html>
