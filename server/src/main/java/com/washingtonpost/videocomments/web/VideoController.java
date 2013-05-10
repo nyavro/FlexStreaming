@@ -2,6 +2,14 @@ package com.washingtonpost.videocomments.web;
 
 import com.washingtonpost.videocomments.model.VideoComment;
 import com.washingtonpost.videocomments.service.VideoCommentsService;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -9,10 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.support.DefaultMultipartHttpServletRequest;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
 
 @Controller
 public class VideoController {
@@ -115,7 +119,26 @@ public class VideoController {
         try {
             //HACK
             fileOutputStream = new FileOutputStream(file);
-            IOUtils.copy(((DefaultMultipartHttpServletRequest) request).getFile("Filedata").getInputStream(), fileOutputStream);
+            final InputStream filedata = ((DefaultMultipartHttpServletRequest) request).getFile("Filedata").getInputStream();
+            IOUtils.copy(filedata, fileOutputStream);
+        } finally {
+            IOUtils.closeQuietly(fileOutputStream);
+        }
+    }
+
+    //TODO: unify with 'video' method
+    @RequestMapping(value = "/videohtml", method = RequestMethod.POST)
+    public void videoHtml(@RequestParam("id") long id, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        VideoComment comment = videoCommentsService.loadComment(id);
+        if (comment.isComplete()) {
+           throw new IllegalArgumentException("Is complete");
+        }
+        File file = new File(videoCommentsService.getPath(), id + ".flv");
+        OutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(file);
+            final InputStream filedata = request.getInputStream();
+            IOUtils.copy(filedata, fileOutputStream);
         } finally {
             IOUtils.closeQuietly(fileOutputStream);
         }

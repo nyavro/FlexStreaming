@@ -5,38 +5,74 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
     </script>
 </head>
-</head>
-<input type="file" id="files" name="files[]" multiple />
+<input type="file" id="record" name="files[]" multiple />
 <output id="list"></output>
+<div id="embedCode">
+    <code id="code">
 
+    </code>
+</div>
 <script>
-  function handleFileSelect(evt) {
-      var files = evt.target.files;
-          $.ajax({
-              url: 'http://192.168.1.242:8080/videocomments/api/video?id=3',
-              type: 'POST',
-              xhr: function() {
-                  var myXhr = $.ajaxSettings.xhr();
-                  if(myXhr.upload){
-                      //myXhr.upload.addEventListener('progress',progressHandlingFunction, false); // for handling the progress of the upload
-                  }
-                  return myXhr;
-              },
-              data: files[0],
-              cache: false,
-              contentType: false,
-              processData: false
-          });
-    var output = [];
-    for (var i = 0, f; f = files[i]; i++) {
-      output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
-                  f.size, ' bytes, last modified: ',
-                  f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
-                  '</li>');
-    }
-    document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
-  }
+    var PROTOCOL = "http"
+    var HOST = "192.168.1.242";
+    var PORT = "8080";
+    var APP = "videocomments";
+    var URL = PROTOCOL + '://' + HOST + ':' + PORT + '/' + APP + '/api/';
+    var EMBED_CODE_TEMPLATE = URL + "video?id=";
+    var EMBED_WIDTH = 640;
+    var EMBED_HEIGHT = 480;
+    var id;
 
-  document.getElementById('files').addEventListener('change', handleFileSelect, false);
+    function handleFileSelect(evt) {
+        $.ajax({
+            url: URL + 'videohtml?id=' + id,
+            type: 'POST',
+            enctype: 'multipart/form-data',
+            data: evt.target.files[0],
+            success: function (data) {
+                var videoUrl = EMBED_CODE_TEMPLATE + id;
+                var embedTemplate = "<<span>div</span> id='{0}'></div><<span>script</span> type='text/javascript'>jwplayer('{0}').setup({file: '{1}', width: '{2}',height: '{3}'});</<span>script</span>>";
+                $("#embedCode").append("<a href='" + videoUrl + "')>Show uploaded video</a>");
+                $("#code").append(embedTemplate.format(id, videoUrl, EMBED_WIDTH,EMBED_HEIGHT));
+            },
+            cache: false,
+            contentType: false,
+            processData: false
+        });
+    }
+
+    $(function () {
+        requestId();
+        if(isMobile()) {
+            alert('Mobile');
+        } else {
+            alert('Other');
+        }
+    })
+
+    function requestId() {
+        $.ajax({
+            url: URL + 'create',
+            success: function (data) {id = data;}
+        });
+    }
+
+    if (!String.prototype.format) {
+      String.prototype.format = function() {
+        var args = arguments;
+        return this.replace(/{(\d+)}/g, function(match, number) {
+          return typeof args[number] != 'undefined'
+            ? args[number]
+            : match
+          ;
+        });
+      };
+    }
+
+    function isMobile(){
+        return window.screen.width*window.screen.height/Math.pow((window.devicePixelRatio == undefined || navigator.userAgent.match(/(iPhone|iPod|iPad)/i) ? 1 : window.devicePixelRatio),2) < 480000;
+    }
+
+    $("#record")[0].addEventListener('change', handleFileSelect, false);
 </script>
 </html>
