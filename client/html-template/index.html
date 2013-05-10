@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+    </script>
+</head>
+<input type="file" id="record" name="files[]" capture accept="video/*.mp4"/>
+<output id="list"></output>
+<div id="embedCode">
+    <code id="code">
+
+    </code>
+</div>
+<script>
+    var PROTOCOL = "http"
+    var HOST = "${host}";
+    var PORT = "8080";
+    var APP = "videocomments";
+    var URL = PROTOCOL + '://' + HOST + ':' + PORT + '/' + APP + '/api/';
+    var EMBED_CODE_TEMPLATE = URL + "video?id=";
+    var EMBED_WIDTH = 480;
+    var EMBED_HEIGHT = 270;
+    var id;
+
+    $(function () {
+        requestId();
+        if(!isMobile()) {
+            window.location.href = "index.template.html";
+        }
+    })
+
+    function handleFileSelect(evt) {
+        $.ajax({
+            url: URL + 'videohtml?id=' + id,
+            type: 'POST',
+            enctype: 'multipart/form-data',
+            data: evt.target.files[0],
+            success: function (data) {
+                var videoUrl = EMBED_CODE_TEMPLATE + id;
+                var embedTemplate = "<<span>div</span> id='{0}'></div><<span>script</span> type='text/javascript'>jwplayer('{0}').setup({file: '{1}', width: '{2}',height: '{3}'});</<span>script</span>>";
+                $("#embedCode").append("<a href='" + videoUrl + "')>Show uploaded video</a>");
+                $("#code").append(embedTemplate.format(id, videoUrl, EMBED_WIDTH,EMBED_HEIGHT));
+            },
+            cache: false,
+            contentType: false,
+            processData: false
+        });
+    }
+
+    function requestId() {
+        $.ajax({
+            url: URL + 'create',
+            success: function (data) {id = data;}
+        });
+    }
+
+    if (!String.prototype.format) {
+      String.prototype.format = function() {
+        var args = arguments;
+        return this.replace(/{(\d+)}/g, function(match, number) {
+          return typeof args[number] != 'undefined'
+            ? args[number]
+            : match
+          ;
+        });
+      };
+    }
+
+    function isMobile(){
+        return window.screen.width*window.screen.height/Math.pow((window.devicePixelRatio == undefined || navigator.userAgent.match(/(iPhone|iPod|iPad)/i) ? 1 : window.devicePixelRatio),2) < 480000;
+    }
+
+    $("#record")[0].addEventListener('change', handleFileSelect, false);
+</script>
+</html>
