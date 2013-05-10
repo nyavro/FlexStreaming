@@ -1,15 +1,14 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-        "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
     </script>
 </head>
-<input type="file" id="record" name="files[]" capture accept="video/*.mp4"/>
-<output id="list"></output>
+<form  enctype="multipart/form-data">
+    <input type="file" id="record" name="files[]" capture accept="video/*.mp4"/>
+</form>
+
 <div id="embedCode">
     <code id="code">
-
     </code>
 </div>
 <script>
@@ -23,12 +22,13 @@
     var EMBED_HEIGHT = 270;
     var id;
 
+    // TODO: should be refactored. Should be one js object, no redirects, just inserts of different html code
     $(function () {
         requestId();
         if(!isMobile()) {
             window.location.href = "index.template.html";
         }
-    })
+    });
 
     function handleFileSelect(evt) {
         $.ajax({
@@ -59,18 +59,16 @@
       String.prototype.format = function() {
         var args = arguments;
         return this.replace(/{(\d+)}/g, function(match, number) {
-          return typeof args[number] != 'undefined'
-            ? args[number]
-            : match
-          ;
+          return typeof args[number] != 'undefined' ? args[number] : match;
         });
       };
     }
 
+    // TODO: should be private function
     function isMobile(){
         return window.screen.width*window.screen.height/Math.pow((window.devicePixelRatio == undefined || navigator.userAgent.match(/(iPhone|iPod|iPad)/i) ? 1 : window.devicePixelRatio),2) < 480000;
     }
 
-    $("#record")[0].addEventListener('change', handleFileSelect, false);
+    document.getElementById('record').addEventListener('change', handleFileSelect, false);
 </script>
 </html>
