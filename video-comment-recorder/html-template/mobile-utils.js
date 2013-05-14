@@ -3,14 +3,18 @@
         var PROTOCOL = "http";
         var PORT = "8080";
         var APP = "videocomments";
-        var URL = PROTOCOL + '://' + host + ':' + PORT + '/' + APP + '/api';
-        var EMBED_CODE_TEMPLATE = URL + "/video?id=";
-        var id;
+        var APP_URL = PROTOCOL + '://' + host + ':' + PORT + '/' + APP + '/api';
+        var EMBED_CODE_TEMPLATE = APP_URL + "/video?id=";
+        var settings = {
+           id: null,
+           url: APP_URL
+        };
+        this.settings = settings;
         if(!isMobile()) {
             if(isFlashEnabled()) {
                 var flashvars = {};
                 flashvars.liveUrl = "rtmp://" + host + "/";
-                flashvars.servletUrl = URL;
+                flashvars.servletUrl = APP_URL;
                 flashvars.videoMaxDuration = videoMaxDuration;
                 flashvars.embedWidth = embedWidth;
                 flashvars.embedHeight = embedHeight;
@@ -37,35 +41,28 @@
             }
         }
         else {
-            this.append("<input type='file' id='record' name='files[]' capture accept='video/*.mp4'/>");
-            requestId();
-            $("#record")[0].addEventListener('change', handleFileSelect, false);
+            this.append("<input type='file' name='file' capture accept='video/*.mp4'/>");
+            requestId(this);
+            var self = this;
+            $("input[name='file']", this)[0].addEventListener('change', function(evt) { handleFileSelect(self, evt);}, false);
         }
         return this;
     };
 
 
-    function handleFileSelect(evt) {
-        $.ajax({
-            url: URL + '/videohtml?id=' + id,
-            type: 'POST',
-            enctype: 'multipart/form-data',
-            data: evt.target.files[0],
-            success: function (data) {
-                var videoUrl = EMBED_CODE_TEMPLATE + id;
-                var embedTemplate = "<<span>div</span> id='{0}'></div><<span>script</span> type='text/javascript'>jwplayer('{0}').setup({file: '{1}', width: '{2}',height: '{3}'});</<span>script</span>>";
-                $("#embedCode").append("<a href='" + videoUrl + "')>Show uploaded video</a>");
-                $("#code").append(embedTemplate.format(id, videoUrl, embedWidth,embedHeight));
-            },
-            cache: false,
-            contentType: false,
-            processData: false
-        });
+    function handleFileSelect(obj, evt) {
+        console.log(evt);
+        var data = new FormData();
+	    var file = $("input[name='file']", obj)[0].files[0];
+        data.append('Filedata', file);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', obj.settings.url + "/video?id=" + id, true);
+        xhr.send(data);
     };
 
-    function requestId() {
+    function requestId(obj) {
         $.ajax({
-            url: URL + '/create',
+            url: obj.settings.url + '/create',
             success: function (data) {id = data;}
         });
     };

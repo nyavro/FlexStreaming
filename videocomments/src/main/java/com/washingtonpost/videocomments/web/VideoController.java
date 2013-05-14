@@ -126,24 +126,6 @@ public class VideoController {
         }
     }
 
-    //TODO: unify with 'video' method
-    @RequestMapping(value = "/videohtml", method = RequestMethod.POST)
-    public void videoHtml(@RequestParam("id") long id, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        VideoComment comment = videoCommentsService.loadComment(id);
-        if (comment.isComplete()) {
-           throw new IllegalArgumentException("Is complete");
-        }
-        File file = new File(videoCommentsService.getPath(), id + ".flv");
-        OutputStream fileOutputStream = null;
-        try {
-            fileOutputStream = new FileOutputStream(file);
-            final InputStream filedata = request.getInputStream();
-            IOUtils.copy(filedata, fileOutputStream);
-        } finally {
-            IOUtils.closeQuietly(fileOutputStream);
-        }
-    }
-
 //    @ExceptionHandler(Exception.class)
 //    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 //    public void serviceExceptionHandler(Exception e, HttpServletResponse response) throws IOException {
