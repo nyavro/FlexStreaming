@@ -14,4 +14,18 @@
         <property name="path" value="${storage.path}"/>
     </bean>
 
+    <bean id="amazonClient" class="com.amazonaws.services.s3.AmazonS3Client">
+        <constructor-arg index="0">
+            <bean class="com.amazonaws.auth.BasicAWSCredentials">
+                <constructor-arg index="0" value="${amazon.accesskey}"/>
+                <constructor-arg index="1" value="${amazon.secretkey}"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="amazonService" class="com.washingtonpost.videocomments.service.AmazonService">
+        <property name="bucket" value="${amazon.bucket}" />
+        <property name="amazonClient" ref="amazonClient"/>
+    </bean>
+
 </beans>

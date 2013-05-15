@@ -13,7 +13,7 @@
         }
         var settings = $.extend({id: null}, defaults, options);
         var appUrl = settings.protocol+"://" + settings.host + ":" + settings.port + "/" + settings.app + "/api";
-        var liveUrl = "rtmp://" + settings.host + "/";
+        var liveUrl = "rtmp://" + settings.host + "/" + settings.app + "/";
         settings.url = appUrl;
         this.settings = settings;
         if(!isMobile()) {

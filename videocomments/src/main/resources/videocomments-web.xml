@@ -2,10 +2,9 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
 
-
-
     <bean id="web.handler.videocomments" class="com.washingtonpost.videocomments.ApplicationAdapter">
         <property name="videoCommentsService" ref="videoCommentsService" />
+        <property name="amazonService" ref="amazonService" />
     </bean>
 
 	<!-- ROOT web context -->
