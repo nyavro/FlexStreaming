@@ -1,25 +1,30 @@
 (function ($) {
-    $.fn.videocomment = function (host, swfUrl, embedWidth, embedHeight, videoMaxDuration, question) {
-        var PROTOCOL = "http";
-        var PORT = "8080";
-        var APP = "videocomments";
-        var APP_URL = PROTOCOL + '://' + host + ':' + PORT + '/' + APP + '/api';
-        var EMBED_CODE_TEMPLATE = APP_URL + "/video?id=";
-        var settings = {
-           id: null,
-           url: APP_URL
-        };
+    $.fn.videocomment = function (options) {
+        var defaults = {
+            host: "localhost",
+            protocol: "http",
+            port: "8080",
+            app: "videocomments",
+            swfUrl: "video-comment-recorder-1.0.swf",
+            embedWidth: 400,
+            embedHeight: 200,
+            videoMaxDuration: 20,
+            question: "{empty}"
+        }
+        var settings = $.extend({id: null}, defaults, options);
+        var appUrl = settings.protocol+"://" + settings.host + ":" + settings.port + "/" + settings.app + "/api";
+        var liveUrl = "rtmp://" + settings.host + "/";
+        settings.url = appUrl;
         this.settings = settings;
         if(!isMobile()) {
             if(isFlashEnabled()) {
                 var flashvars = {};
-                flashvars.liveUrl = "rtmp://" + host + "/";
-                flashvars.servletUrl = APP_URL;
-                flashvars.videoMaxDuration = videoMaxDuration;
-                flashvars.embedWidth = embedWidth;
-                flashvars.embedHeight = embedHeight;
-                flashvars.embedUrlTemplate = EMBED_CODE_TEMPLATE + "{0}";
-                flashvars.question = question;
+                flashvars.liveUrl = liveUrl;
+                flashvars.servletUrl = appUrl;
+                flashvars.videoMaxDuration = settings.videoMaxDuration;
+                flashvars.embedWidth = settings.embedWidth;
+                flashvars.embedHeight = settings.embedHeight;
+                flashvars.question = settings.question;
                 var params = {};
                 params.menu = "false";
                 params.quality = "best";
@@ -32,7 +37,7 @@
                 var attributes = {};
                 attributes.id = "swfPlaceholder";
                 attributes.name = "swfPlaceholder";
-                swfobject.embedSWF(swfUrl, this.attr("id"), "100%", "100%", "9.0.124", "expressInstall.swf", flashvars, params, attributes);
+                swfobject.embedSWF(settings.swfUrl, this.attr("id"), "100%", "100%", "9.0.124", "expressInstall.swf", flashvars, params, attributes);
             }
             else {
                 this

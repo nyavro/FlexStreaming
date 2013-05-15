@@ -39,7 +39,6 @@
         private var videoId:String;
         private var embedWidth:int;
         private var embedHeight:int;
-        private var embedUrlTemplate:String;
         private var servletUrl:String;
 
         private const controlWidth:int = 640;
@@ -73,7 +72,6 @@
             liveUrl = FlexGlobals.topLevelApplication.parameters.liveUrl;
             embedWidth = FlexGlobals.topLevelApplication.parameters.embedWidth;
             embedHeight = FlexGlobals.topLevelApplication.parameters.embedHeight;
-            embedUrlTemplate = FlexGlobals.topLevelApplication.parameters.embedUrlTemplate;
             videoMaxDuration = FlexGlobals.topLevelApplication.parameters.videoMaxDuration;
             servletUrl = FlexGlobals.topLevelApplication.parameters.servletUrl;
             question = FlexGlobals.topLevelApplication.parameters.question;
@@ -193,7 +191,7 @@
         private function finishComment():void {
             communicationService.complete(videoId);
             var wind:EmbedCodeWindow = new EmbedCodeWindow();
-            wind.embedCode = EmbedCodeGenerator.generateCode(videoId, embedUrlTemplate, embedWidth, embedHeight);
+            wind.embedCode = EmbedCodeGenerator.generateCode(videoId, servletUrl, embedWidth, embedHeight);
             PopUpManager.addPopUp(wind, this, true);
             PopUpManager.centerPopUp(wind);
             currentState = 'done';

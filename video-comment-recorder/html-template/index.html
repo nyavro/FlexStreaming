@@ -6,7 +6,7 @@
         <script type="text/javascript" src="mobile-utils.js"></script>
         <script type="text/javascript">
             $(function () {
-                $("#test").videocomment("${host}", "${swf}", 480, 270, 30, "What our Clients think?");
+                $("#test").videocomment({host:"${host}", swfUrl:"${swf}", embedWidth:480, embedHeight:270, videoMaxDuration: 30, question: "What our Clients think?"});
             })
         </script>
     </head>
