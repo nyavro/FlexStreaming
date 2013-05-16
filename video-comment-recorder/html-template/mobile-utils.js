@@ -48,9 +48,11 @@
         }
         else {
             this.append("<input type='file' name='file' capture accept='video/*.mp4'/>");
+            this.append("<input type='file' name='thumbnail' accept='image/*'/>");
             requestId(this);
             var self = this;
             $("input[name='file']", this)[0].addEventListener('change', function(evt) { handleFileSelect(self, evt);}, false);
+            $("input[name='thumbnail']", this)[0].addEventListener('change', function(evt) { handleThumbnailSelect(self, evt);}, false);
         }
         return this;
     };
@@ -64,7 +66,29 @@
         var xhr = new XMLHttpRequest();
         xhr.open('POST', obj.settings.url + "/video?id=" + id, true);
         xhr.send(data);
+        obj.videoSent = true;
+        finish(obj);
     };
+
+    function handleThumbnailSelect(obj, evt) {
+        console.log(evt);
+        var data = new FormData();
+        var file = $("input[name='thumbnail']", obj)[0].files[0];
+        data.append('Filedata', file);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', obj.settings.url + "/thumbnail?id=" + id, true);
+        xhr.send(data);
+        obj.thumbnailSent = true;
+        finish(obj);
+    };
+
+    function finish(obj) {
+        if(obj.thumbnailSent && obj.videoSent) {
+            $.ajax({
+                url: obj.settings.url + '/complete'
+            });
+        }
+    }
 
     function requestId(obj) {
         $.ajax({
