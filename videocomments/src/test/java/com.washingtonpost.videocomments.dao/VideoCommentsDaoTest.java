@@ -6,8 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -47,6 +46,8 @@ public class VideoCommentsDaoTest extends AbstractTestNGSpringContextTests {
     private VideoComment newVideoComment(String name) {
         VideoComment comment = new VideoComment();
         comment.setComplete(false);
+        comment.setHasVideo(true);
+        comment.setHasThumbnail(true);
         return comment;
     }
 
@@ -67,11 +68,11 @@ public class VideoCommentsDaoTest extends AbstractTestNGSpringContextTests {
     public void testUpdate() {
         VideoComment record = newVideoComment("name");
         videoCommentsDao.create(record);
-        long id = record.getId();
+        UUID id = record.getId();
         record.setComplete(false);
         videoCommentsDao.update(record);
         VideoComment updatedRecord = videoCommentsDao.load(id);
-        Assert.assertTrue(updatedRecord.getId() == id);
+        Assert.assertEquals(updatedRecord.getId(), id);
         Assert.assertEquals(updatedRecord, record);
     }
 

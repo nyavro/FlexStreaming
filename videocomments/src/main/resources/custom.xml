@@ -12,6 +12,8 @@
     <bean id="videoCommentsService" class="com.washingtonpost.videocomments.service.VideoCommentsService">
         <property name="videoCommentsDao" ref="videoCommentsDao" />
         <property name="path" value="${storage.path}"/>
+        <property name="taskExecutor" ref="taskExecutor"/>
+        <property name="amazonService" ref="amazonService" />
     </bean>
 
     <bean id="amazonClient" class="com.amazonaws.services.s3.AmazonS3Client">
@@ -26,6 +28,12 @@
     <bean id="amazonService" class="com.washingtonpost.videocomments.service.AmazonService">
         <property name="bucket" value="${amazon.bucket}" />
         <property name="amazonClient" ref="amazonClient"/>
+    </bean>
+
+    <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="5" />
+        <property name="maxPoolSize" value="10" />
+        <property name="queueCapacity" value="25" />
     </bean>
 
 </beans>

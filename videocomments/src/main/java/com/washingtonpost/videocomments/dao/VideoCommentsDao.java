@@ -13,6 +13,7 @@ import org.springframework.util.Assert;
 
 import java.sql.*;
 import java.util.List;
+import java.util.UUID;
 
 public class VideoCommentsDao {
 
@@ -28,7 +29,7 @@ public class VideoCommentsDao {
 
     public void create(final VideoComment comment) {
         Assert.isNull(comment.getId());
-        final KeyHolder keyHolder = new GeneratedKeyHolder();
+        final UUIDKeyHolder keyHolder = new UUIDKeyHolder();
         final PreparedStatementCreator psc = new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(Connection con)
@@ -37,35 +38,44 @@ public class VideoCommentsDao {
                 comment.setCreatedAt(timestamp);
                 comment.setUpdatedAt(timestamp);
                 PreparedStatement pst = con.prepareStatement(
-                        "insert into VIDEO_COMMENTS (CREATED_AT, UPDATED_AT, COMPLETE)" +
-                                " values (?, ?, ?) ", new String[]{"id"});
+                        "insert into VIDEO_COMMENTS (CREATED_AT, UPDATED_AT, VIDEO, THUMBNAIL, COMPLETE)" +
+                                " values (?, ?, ?, ?, ?) ", new String[]{"id"});
                 pst.setTimestamp(1, timestamp);
                 pst.setTimestamp(2, timestamp);
-                pst.setInt(3, comment.isComplete() ? 1: 0);
+                pst.setInt(3, comment.isHasVideo() ? 1: 0);
+                pst.setInt(4, comment.isHasThumbnail() ? 1: 0);
+                pst.setInt(5, comment.isComplete() ? 1: 0);
                 return pst;
             }
         };
 
         jdbcTemplate.update(psc, keyHolder);
-        comment.setId(keyHolder.getKey().longValue());
+
+        comment.setId(keyHolder.getKeyUUID());
         log.debug("Created comment " + comment.getId());
     }
 
     public boolean update(VideoComment comment) {
         Assert.notNull(comment.getId());
-        int count = jdbcTemplate.update("update VIDEO_COMMENTS set UPDATED_AT = ?, COMPLETE = ? where ID = ?",
-                new Object[]{comment.getUpdatedAt(), comment.isComplete() ? 1: 0, comment.getId()});
+        int count = jdbcTemplate.update("update VIDEO_COMMENTS set UPDATED_AT = ?, VIDEO = ?, THUMBNAIL = ?, COMPLETE = ? where ID = ?",
+                new Object[]{
+                        comment.getUpdatedAt(),
+                        comment.isHasVideo() ? 1: 0,
+                        comment.isHasThumbnail() ? 1: 0,
+                        comment.isComplete() ? 1: 0,
+                        comment.getId()}
+        );
         log.debug("Updated node " + comment.getId());
         return count > 0;
     }
 
-    public int delete(long id) {
+    public int delete(UUID id) {
         int count = jdbcTemplate.update("delete from VIDEO_COMMENTS where ID = ?", new Object[]{id});
         log.debug("Deleted node " + id);
         return count;
     }
 
-    public VideoComment load(long id) {
+    public VideoComment load(UUID id) {
         return (VideoComment) jdbcTemplate.queryForObject("select * from VIDEO_COMMENTS where ID=?",
                 new Object[]{id}, new VideoCommentRowMapper());
     }
@@ -91,9 +101,11 @@ public class VideoCommentsDao {
         @Override
         public VideoComment mapRow(ResultSet resultSet, int i) throws SQLException {
             VideoComment record = new VideoComment();
-            record.setId(resultSet.getLong("ID"));
+            record.setId((UUID) resultSet.getObject("ID"));
             record.setCreatedAt(resultSet.getTimestamp("CREATED_AT"));
             record.setUpdatedAt(resultSet.getTimestamp("UPDATED_AT"));
+            record.setHasVideo(resultSet.getBoolean("VIDEO"));
+            record.setHasThumbnail(resultSet.getBoolean("THUMBNAIL"));
             record.setComplete(resultSet.getBoolean("COMPLETE"));
             return record;
         }

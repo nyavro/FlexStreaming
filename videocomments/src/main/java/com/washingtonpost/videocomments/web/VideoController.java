@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
@@ -26,25 +27,24 @@ public class VideoController {
 
     @RequestMapping(value = "/create", method = RequestMethod.GET)
     public void create(HttpServletResponse response) throws IOException {
-        Long id = videoCommentsService.createNewComment();
+        UUID id = videoCommentsService.createNewComment();
         response.getWriter().write(id.toString());
     }
 
     @RequestMapping(value = "/complete", method = RequestMethod.GET)
-    public void complete(@RequestParam("id") long id, HttpServletResponse response) throws IOException {
-        videoCommentsService.complete(id);
+    public void complete(@RequestParam("id") String id, HttpServletResponse response) throws IOException {
+        UUID uuid = UUID.fromString(id);
+        videoCommentsService.complete(uuid);
         response.getWriter().write("OK");
     }
 
 
     @RequestMapping(value = "/video", method = RequestMethod.GET)
-    public void video(@RequestParam("id") long id, HttpServletResponse response) throws IOException {
-        if (id < 0) {
-            throw new IllegalArgumentException("");
-        }
-        checkComment(id);
+    public void video(@RequestParam("id") String id, HttpServletResponse response) throws IOException {
+        UUID uuid = UUID.fromString(id);
+        checkComment(uuid);
         response.setContentType("video/x-flv");
-        File file = new File(videoCommentsService.getPath() + File.separator + id + ".flv");
+        File file = new File(videoCommentsService.getPath() + File.separator + uuid.toString() + ".flv");
         if (!file.exists()) {
             throw new RuntimeException("Not found");
         }
@@ -57,7 +57,7 @@ public class VideoController {
         }
     }
 
-    private void checkComment(long id) {
+    private void checkComment(UUID id) {
         VideoComment comment = videoCommentsService.loadComment(id);
         if (!comment.isComplete()) {
             throw new IllegalArgumentException("Not created yet");
@@ -65,13 +65,11 @@ public class VideoController {
     }
 
     @RequestMapping(value = "/thumbnail", method = RequestMethod.GET)
-    public void thumbnail(@RequestParam("id") long id, HttpServletResponse response) throws IOException {
-        if (id < 0) {
-            throw new IllegalArgumentException("");
-        }
-        checkComment(id);
+    public void thumbnail(@RequestParam("id") String id, HttpServletResponse response) throws IOException {
+        UUID uuid = UUID.fromString(id);
+        checkComment(uuid);
         response.setContentType("image/jpeg");
-        File file = new File(videoCommentsService.getPath() + File.separator + id + ".jpg");
+        File file = new File(videoCommentsService.getPath() + File.separator + uuid.toString() + ".jpg");
         if (!file.exists()) {
             throw new RuntimeException("Not found");
         }
@@ -86,8 +84,9 @@ public class VideoController {
 
 
     @RequestMapping(value = "/thumbnail", method = RequestMethod.POST)
-    public void thumbnail(@RequestParam("id") long id, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        VideoComment comment = videoCommentsService.loadComment(id);
+    public void thumbnail(@RequestParam("id") String id, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        UUID uuid = UUID.fromString(id);
+        VideoComment comment = videoCommentsService.loadComment(uuid);
         if (comment.isComplete()) {
             throw new IllegalArgumentException("Is complete");
         }
@@ -102,6 +101,7 @@ public class VideoController {
         try {
             fileOutputStream = new FileOutputStream(file);
             IOUtils.copy(request.getInputStream(), fileOutputStream);
+            videoCommentsService.addThumbnail(uuid);
         } finally {
             IOUtils.closeQuietly(fileOutputStream);
         }
@@ -109,18 +109,19 @@ public class VideoController {
     }
 
     @RequestMapping(value = "/video", method = RequestMethod.POST)
-    public void video(@RequestParam("id") long id, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        VideoComment comment = videoCommentsService.loadComment(id);
+    public void video(@RequestParam("id") String id, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        UUID uuid = UUID.fromString(id);
+        VideoComment comment = videoCommentsService.loadComment(uuid);
         if (comment.isComplete()) {
             throw new IllegalArgumentException("Is complete");
         }
         File file = new File(videoCommentsService.getPath(), id + ".flv");
         OutputStream fileOutputStream = null;
         try {
-            //HACK
             fileOutputStream = new FileOutputStream(file);
             final InputStream filedata = ((DefaultMultipartHttpServletRequest) request).getFile("Filedata").getInputStream();
             IOUtils.copy(filedata, fileOutputStream);
+            videoCommentsService.addVideo(uuid);
         } finally {
             IOUtils.closeQuietly(fileOutputStream);
         }

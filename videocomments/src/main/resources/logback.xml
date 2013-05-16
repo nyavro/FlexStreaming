@@ -51,6 +51,9 @@
     <logger name="com.washingtonpost.videocomments">
         <level value="DEBUG" />
     </logger>
+    <logger name="org.apache.http">
+        <level value="INFO" />
+    </logger>
     <!-- Red5 -->
 	<logger name="org.red5.io">
 		<level value="INFO" />
