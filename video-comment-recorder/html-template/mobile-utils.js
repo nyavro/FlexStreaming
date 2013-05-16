@@ -25,6 +25,7 @@
                 flashvars.embedWidth = settings.embedWidth;
                 flashvars.embedHeight = settings.embedHeight;
                 flashvars.question = settings.question;
+                flashvars.embedTemplate = settings.embedTemplate;
                 var params = {};
                 params.menu = "false";
                 params.quality = "best";

@@ -1,20 +1,9 @@
 package com.wp.services {
-import com.wp.RemotingConnection;
-
 import flash.events.Event;
-
-import flash.net.Responder;
 import flash.net.URLLoader;
 import flash.net.URLRequest;
 import flash.net.URLRequestMethod;
-
 import flash.utils.ByteArray;
-
-import mx.controls.Alert;
-
-import mx.utils.StringUtil;
-
-import mx.utils.UIDUtil;
 
 public class CommunicationService {
     private var url:String;

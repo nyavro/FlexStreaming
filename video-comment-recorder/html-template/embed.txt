@@ -1,0 +1,18 @@
+<div id="{0}" onclick="initPlayer('{0}', {1}, {2}, {3})">
+    <a onclick="initPlayer()">Show comment</a>
+</div>
+<script type='text/javascript'>
+    function initPlayer(id, url, width, height) {
+        jwplayer(id).setup({
+            "flashplayer": "http://www.longtailvideo.com/content/ova/jwplayer/player.swf",
+            "playlist": [
+                {
+                    "file":  url + "/video?id=" + id,
+                    "image": url + "/thumbnail?id=" + id
+                }
+            ],
+            "width": width,
+            "height": height
+        });
+    }
+</script>

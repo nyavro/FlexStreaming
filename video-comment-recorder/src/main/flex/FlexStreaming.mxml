@@ -2,21 +2,17 @@
 <s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
                xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:util="com.wp.ui.*">
     <fx:Script><![CDATA[
-        import avmplus.finish;
-
-        import com.wp.RemotingConnection;
         import com.wp.services.CommunicationService;
         import com.wp.services.ThumbnailsExtractorService;
         import com.wp.ui.EmbedCodeWindow;
-        import com.wp.utils.EmbedCodeGenerator;
+        import com.wp.utils.VideoUploadHelper;
 
         import mx.controls.Alert;
         import mx.controls.Image;
         import mx.core.FlexGlobals;
         import mx.graphics.codec.JPEGEncoder;
         import mx.managers.PopUpManager;
-
-        import org.osmf.events.MediaPlayerStateChangeEvent;
+        import mx.utils.StringUtil;
 
         import org.osmf.events.TimeEvent;
 
@@ -40,6 +36,7 @@
         private var embedWidth:int;
         private var embedHeight:int;
         private var servletUrl:String;
+        private var embedTemplate:String;
 
         private const controlWidth:int = 640;
         private const controlHeight:int = 480;
@@ -75,6 +72,7 @@
             videoMaxDuration = FlexGlobals.topLevelApplication.parameters.videoMaxDuration;
             servletUrl = FlexGlobals.topLevelApplication.parameters.servletUrl;
             question = FlexGlobals.topLevelApplication.parameters.question;
+            embedTemplate = FlexGlobals.topLevelApplication.parameters.embedTemplate;
             mic = Microphone.getMicrophone();
             mic.setUseEchoSuppression(true);
             mic.setSilenceLevel(0);
@@ -191,12 +189,11 @@
         private function finishComment():void {
             communicationService.complete(videoId);
             var wind:EmbedCodeWindow = new EmbedCodeWindow();
-            wind.embedCode = EmbedCodeGenerator.generateCode(videoId, servletUrl, embedWidth, embedHeight);
+            wind.embedCode = StringUtil.substitute(embedTemplate, [videoId, servletUrl, embedWidth, embedHeight]);
             PopUpManager.addPopUp(wind, this, true);
             PopUpManager.centerPopUp(wind);
             currentState = 'done';
         }
-
         ]]></fx:Script>
     <s:states>
         <s:State name="start"/>
