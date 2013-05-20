@@ -1,0 +1,21 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+    <head>
+        <title>Video comment</title>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script type="text/javascript" src="swfobject.js"></script>
+        <script type="text/javascript" src="mobile-utils.js"></script>
+        <script type="text/javascript">
+            $(function () {
+                $.get('embed.txt',
+                    function(embed){
+                        $("#test").videocomment({host:"${host}", swfUrl:"${swf}", width:640, height:480, embedWidth:480, embedHeight:270, videoMaxDuration: 30, question: "What our Clients think?", embedTemplate:encodeURIComponent(embed)});
+                    }
+                );
+            })
+        </script>
+    </head>
+
+    <body style="margin: 0px;" width="700" height="380">
+        <div id="test" width="700" height="380"/>
+    </body>
+</html>

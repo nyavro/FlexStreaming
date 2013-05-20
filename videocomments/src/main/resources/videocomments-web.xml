@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+    <bean id="web.handler.videocomments" class="com.washingtonpost.videocomments.ApplicationAdapter">
+        <property name="videoCommentsService" ref="videoCommentsService" />
+        <property name="amazonService" ref="amazonService" />
+    </bean>
+
+	<!-- ROOT web context -->
+	<bean id="web.context.videocomments" class="org.red5.server.Context">
+		<property name="scopeResolver" ref="red5.scopeResolver" />
+		<property name="clientRegistry" ref="global.clientRegistry" />
+		<property name="serviceInvoker" ref="global.serviceInvoker" />
+		<property name="mappingStrategy" ref="global.mappingStrategy" />
+	</bean>
+	
+	<bean id="web.scope.videocomments" class="org.red5.server.WebScope" init-method="register">
+		<property name="server" ref="red5.server" />
+		<property name="parent" ref="global.scope" />
+		<property name="context" ref="web.context.videocomments" />
+		<property name="handler" ref="web.handler.videocomments" />
+		<property name="contextPath" value="/videocomments" />
+		<property name="virtualHosts" value="*" />
+	</bean>
+
+</beans>

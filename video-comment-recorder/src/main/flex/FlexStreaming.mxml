@@ -1,0 +1,253 @@
+<?xml version="1.0"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+               xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:util="com.wp.ui.*" width="100%" height="100%">
+    <fx:Script><![CDATA[
+        import com.wp.services.CommunicationService;
+        import com.wp.services.ThumbnailsExtractorService;
+        import com.wp.ui.EmbedCodeWindow;
+        import com.wp.utils.VideoUploadHelper;
+
+        import mx.controls.Alert;
+        import mx.controls.Image;
+        import mx.core.FlexGlobals;
+        import mx.graphics.codec.JPEGEncoder;
+        import mx.managers.PopUpManager;
+        import mx.utils.StringUtil;
+
+        import org.osmf.events.TimeEvent;
+
+        private var camera:Camera;
+        private var mic:Microphone;
+        private var cam:Camera;
+        private var nc:NetConnection;
+        private var ns:NetStream;
+        private var video:Video;
+        private var liveUrl:String;
+
+        [Bindable]
+        private var isUpload:Boolean = false;
+        private var isComplete:Boolean = false;
+
+        [Bindable]
+        private var videoMaxDuration:int;
+
+        [Bindable]
+        private var question:String;
+
+        private var cameraAccessGranted:Boolean = false;
+        private var thumbnailsExtractorService:ThumbnailsExtractorService;
+        private var communicationService:CommunicationService;
+        private var videoId:String;
+        private var embedWidth:int;
+        private var embedHeight:int;
+        private var servletUrl:String;
+        private var embedTemplate:String;
+        private const padding:int = 15;
+
+        private function ensureCameraPermissions():void {
+            cam.addEventListener(StatusEvent.STATUS, cameraAccessAllowed);
+            var vid:Video = new Video();
+            vid.attachCamera(cam);
+        }
+
+        private function cameraAccessAllowed(event:StatusEvent):void {
+            switch (event.code) {
+                case "Camera.Muted":
+                    trace("User clicked Deny.");
+                    break;
+                case "Camera.Unmuted":
+                    recordButton.enabled = true;
+                    break;
+            }
+        }
+
+        private function connect():void {
+            nc = new NetConnection();
+            nc.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
+            nc.connect(liveUrl);
+        }
+
+        private function init():void {
+            liveUrl = FlexGlobals.topLevelApplication.parameters.liveUrl;
+            embedWidth = FlexGlobals.topLevelApplication.parameters.embedWidth;
+            embedHeight = FlexGlobals.topLevelApplication.parameters.embedHeight;
+            videoMaxDuration = FlexGlobals.topLevelApplication.parameters.videoMaxDuration;
+            servletUrl = FlexGlobals.topLevelApplication.parameters.servletUrl;
+            question = FlexGlobals.topLevelApplication.parameters.question;
+            embedTemplate = FlexGlobals.topLevelApplication.parameters.embedTemplate;
+            mic = Microphone.getMicrophone();
+            mic.setUseEchoSuppression(true);
+            mic.setSilenceLevel(0);
+            cam = Camera.getCamera();
+            cam.setQuality(65536, 90);
+            cam.setMode(this.width, this.height, 15);
+            video = new Video();
+            video.opaqueBackground = false;
+            videoContainer.video = video;
+            videoContainer.addChild(countDownSplash);
+            thumbnailsExtractorService = new ThumbnailsExtractorService(video, width/3, height/4);
+            communicationService = new CommunicationService(servletUrl);
+            videoTimer.time = videoMaxDuration;
+        }
+
+        private function startRecording():void {
+            currentState = 'record';
+            ns = new NetStream(nc);
+            ns.attachAudio(mic);
+            ns.attachCamera(cam);
+            ns.publish(videoId, "record");
+            video.attachCamera(cam);
+            videoTimer.start(videoMaxDuration, stopRecording);
+            thumbnailsExtractorService.start();
+        }
+
+        private function stopRecording():void {
+            countDownSplash.stop();
+            ns.attachCamera(null);
+            ns.attachAudio(null);
+            ns.close();
+            video.attachCamera(null);
+            videoTimer.stop();
+            thumbnailsExtractorService.stop();
+            var thumbnails:Array = thumbnailsExtractorService.getThumbnails();
+            if(thumbnails.length==0) {
+                currentState = 'start';
+            } else {
+                currentState = 'selectThumbnail';
+                updateThumbnails(thumbnails);
+            }
+        }
+
+        private function updateThumbnails(thumbnails:Array):void {
+            if (thumbnails.length > 0) {
+                thumbnail0.source = new Bitmap(thumbnails[(int)((thumbnails.length * 1) / 8)]);
+                thumbnail1.source = new Bitmap(thumbnails[(int)((thumbnails.length * 3) / 8)]);
+                thumbnail2.source = new Bitmap(thumbnails[(int)((thumbnails.length * 5) / 8)]);
+                thumbnail3.source = new Bitmap(thumbnails[(int)((thumbnails.length * 7) / 8)]);
+            }
+        }
+
+        private function encodeToJPEG(data:BitmapData, quality:Number = 75):ByteArray {
+            return new JPEGEncoder(quality).encode(data);
+        }
+
+        private function submitThumbnail(image:Image):void {
+            communicationService.setThumbnail(videoId, encodeToJPEG((image.source as Bitmap).bitmapData));
+            currentState = 'done';
+        }
+
+        private function switchToDone():void {
+            currentState = 'done';
+        }
+
+        private function playRecording():void {
+            currentState = 'play';
+            setTimeout(switchToDone, videoTimer.recordedDuration());
+            videoDisplay.source = liveUrl + "/" + videoId;
+        }
+
+        private function streamStatusHandler(event:NetStatusEvent):void {
+            switch (event.info.code) {
+                case "NetStream.Play.Start":
+//                    currentState = 'play';
+                    break;
+                case "NetStream.Play.Stop":
+                    currentState = 'done';
+                    break;
+            }
+        }
+
+        private function netStatusHandler(event:NetStatusEvent):void {
+            trace(event.info.code);
+            if (event.info.code == "NetConnection.Connect.Success") {
+                this.recordButton.enabled = true;
+            }
+            else {
+                this.recordButton.enabled = false;
+                Alert.show("Failed to connect!");
+            }
+        }
+
+        private function onReady():void {
+            init();
+            ensureCameraPermissions();
+            connect();
+            communicationService.create(function (createdId:String):void {
+                videoId = createdId;
+                currentState = 'start';
+            });
+        }
+
+        private function startEffect():void {
+            countDownSplash.start(startRecording, 3);
+            currentState = 'countDown';
+        }
+
+        private function uploadVideo():void {
+            currentState = 'upload';
+            isUpload = true;
+            new VideoUploadHelper(servletUrl, videoId, uploadProgress.setProgress, switchToDone).upload();
+        }
+
+        private function finishComment():void {
+            communicationService.complete(videoId);
+            var wind:EmbedCodeWindow = new EmbedCodeWindow();
+            wind.embedCode = StringUtil.substitute(embedTemplate, [videoId, servletUrl, embedWidth, embedHeight]);
+            PopUpManager.addPopUp(wind, this, true);
+            PopUpManager.centerPopUp(wind);
+            currentState = 'done';
+            isComplete = true;
+        }
+        ]]></fx:Script>
+    <s:states>
+        <s:State name="start"/>
+        <s:State name="record"/>
+        <s:State name="selectThumbnail"/>
+        <s:State name="play"/>
+        <s:State name="done"/>
+        <s:State name="upload"/>
+        <s:State name="countDown"/>
+    </s:states>
+    <s:SkinnableContainer width="100%" height="100%" backgroundColor="#515151">
+        <mx:VBox horizontalAlign="center" width="100%" height="100%" includeIn="start,record,upload,countDown" creationComplete="onReady()">
+            <s:SkinnableContainer width="100%" height="100%">
+                <mx:VBox horizontalAlign="center" verticalAlign="middle" width="100%" height="100%">
+                    <util:VideoContainer id="videoContainer" height="100%" width="100%"/>
+                </mx:VBox>
+                <mx:VBox horizontalAlign="center" backgroundAlpha="0" verticalAlign="middle" width="100%" height="100%">
+                    <util:CountDownSplash id="countDownSplash"/>
+                </mx:VBox>
+                <mx:Text selectable="false" id="questionText" text="{question}" fontSize="{width/32}" color="#FFFFFF" height="10%" width="100%" textAlign="center" y="10"/>
+                <util:VideoTimer width="8%" id="videoTimer" x="10" y="10"/>
+            </s:SkinnableContainer>
+        </mx:VBox>
+        <mx:VBox width="100%" height="100%" verticalAlign="bottom" verticalAlign.done="middle" paddingBottom="{height/10}" paddingBottom.done="0">
+            <mx:HBox height="8%" width="100%" horizontalAlign="center" horizontalGap="{width/16}">
+                <mx:Button id="recordButton" label.start="Record a Video" label.done="Re-record" includeIn="start, done"
+                           visible="{isUpload == false}" includeInLayout="{recordButton.visible}" enabled="{!isComplete}" click="startEffect()" fontSize="{width/40}" width="25%" height="100%"/>
+                <mx:Button label="Stop" id="stop" includeIn="record" click="stopRecording()"  fontSize="{width/40}" width="25%" height="100%"/>
+                <mx:Button label="Preview" includeIn="done" click="playRecording()"
+                           visible="{isUpload == false}" includeInLayout="{recordButton.visible}" fontSize="{width/40}" width="25%" height="100%"/>
+                <mx:Button label="Upload a Video" includeIn="start" click="uploadVideo()" fontSize="{width/40}" width="25%" height="100%"/>
+                <mx:Button label="Submit" includeIn="done" click="finishComment()"  fontSize="{width/40}" width="25%" height="100%"/>
+            </mx:HBox>
+            <mx:ProgressBar id="uploadProgress" width="100%" mode="manual" includeIn="upload"/>
+        </mx:VBox>
+        <mx:VBox includeIn="selectThumbnail" horizontalAlign="center" verticalAlign="middle" width="100%" height="100%" verticalGap="{height/20}">
+            <mx:HBox width="100%" horizontalGap="{width/30}" horizontalAlign="center">
+                <mx:VBox click="submitThumbnail(thumbnail0)"><mx:Image id="thumbnail0"/></mx:VBox>
+                <mx:VBox click="submitThumbnail(thumbnail1)"><mx:Image id="thumbnail1"/></mx:VBox>
+            </mx:HBox>
+            <mx:HBox width="100%" horizontalGap="{width/30}" horizontalAlign="center">
+                <mx:VBox click="submitThumbnail(thumbnail2)"><mx:Image id="thumbnail2"/></mx:VBox>
+                <mx:VBox click="submitThumbnail(thumbnail3)"><mx:Image id="thumbnail3"/></mx:VBox>
+            </mx:HBox>
+        </mx:VBox>
+        <mx:VBox id="videoPlayer" includeIn="play" horizontalAlign="center" width="100%" height="100%">
+            <mx:HBox width="100%" height="100%">
+                <s:VideoPlayer id="videoDisplay" autoPlay="true" width="100%" height="100%"/>
+            </mx:HBox>
+        </mx:VBox>
+        <mx:Text includeIn="selectThumbnail" text="Select your Thumbnail" color="#FFFFFF" fontSize="{width/32}" textAlign="center" width="100%" height="10%"/>
+    </s:SkinnableContainer>
+</s:Application>

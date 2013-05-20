@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <bean id="streamFilenameGenerator" class="com.washingtonpost.videocomments.FileNameGenerator" init-method="init">
+        <property name="path" value="${storage.path}"/>
+    </bean>
+
+    <bean id="videoCommentsService" class="com.washingtonpost.videocomments.service.VideoCommentsService">
+        <property name="videoCommentsDao" ref="videoCommentsDao" />
+        <property name="path" value="${storage.path}"/>
+        <property name="taskExecutor" ref="taskExecutor"/>
+        <property name="amazonService" ref="amazonService" />
+    </bean>
+
+    <bean id="amazonClient" class="com.amazonaws.services.s3.AmazonS3Client">
+        <constructor-arg index="0">
+            <bean class="com.amazonaws.auth.BasicAWSCredentials">
+                <constructor-arg index="0" value="${amazon.accesskey}"/>
+                <constructor-arg index="1" value="${amazon.secretkey}"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="amazonService" class="com.washingtonpost.videocomments.service.AmazonService">
+        <property name="bucket" value="${amazon.bucket}" />
+        <property name="amazonClient" ref="amazonClient"/>
+    </bean>
+
+    <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="5" />
+        <property name="maxPoolSize" value="10" />
+        <property name="queueCapacity" value="25" />
+    </bean>
+
+</beans>
