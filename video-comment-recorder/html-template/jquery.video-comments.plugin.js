@@ -1,5 +1,7 @@
+// TODO get rid off global variables: such as id
+// TODO To be reviewed
 (function ($) {
-    $.fn.videocomment = function (options) {
+    $.fn.videocomments = function (options) {
         var defaults = {
             host: "localhost",
             protocol: "http",
@@ -9,11 +11,11 @@
             embedWidth: 400,
             embedHeight: 200,
             videoMaxDuration: 20,
-            question: "{empty}",
+            question: "Please record your comment",
             width: 640,
             height: 480
         }
-        var settings = $.extend({id: null}, defaults, options);
+        var settings = $.extend({id: null}, defaults, options); // TODO why the first attribute?
         var appUrl = settings.protocol+"://" + settings.host + ":" + settings.port + "/" + settings.app + "/api";
         var liveUrl = "rtmp://" + settings.host + "/" + settings.app + "/";
         settings.url = appUrl;
@@ -51,7 +53,7 @@
         else {
             this.append("<input type='file' name='file' capture accept='video/*.mp4'/>");
             this.append("<input type='file' name='thumbnail' accept='image/*'/>");
-            requestId(this);
+            getRequestId(this);
             var self = this;
             $("input[name='file']", this)[0].addEventListener('change', function(evt) { handleFileSelect(self, evt);}, false);
             $("input[name='thumbnail']", this)[0].addEventListener('change', function(evt) { handleThumbnailSelect(self, evt);}, false);
@@ -61,7 +63,7 @@
 
 
     function handleFileSelect(obj, evt) {
-        console.log(evt);
+        //console.log(evt);
         var data = new FormData();
 	    var file = $("input[name='file']", obj)[0].files[0];
         data.append('Filedata', file);
@@ -73,7 +75,7 @@
     };
 
     function handleThumbnailSelect(obj, evt) {
-        console.log(evt);
+        //console.log(evt);
         var data = new FormData();
         var file = $("input[name='thumbnail']", obj)[0].files[0];
         data.append('Filedata', file);
@@ -92,7 +94,7 @@
         }
     }
 
-    function requestId(obj) {
+    function getRequestId(obj) {
         $.ajax({
             url: obj.settings.url + '/create',
             success: function (data) {id = data;}
