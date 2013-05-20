@@ -25,6 +25,16 @@ public class AmazonService {
     public void upload(InputStream stream, String target, long contentLength) {
         List<PartETag> partETags = new ArrayList<PartETag>();
         InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(bucket, target);
+        ObjectMetadata metadata = new ObjectMetadata();
+        if (target.toLowerCase().endsWith(".jpg")) {
+            metadata.setContentType("image/jpeg");
+        } else if (target.toLowerCase().endsWith(".mp4")) {
+            metadata.setContentType("video/mp4");
+        } else {
+            metadata.setContentType("video/flv");
+        }
+        initRequest.setObjectMetadata(metadata);
+        initRequest.setCannedACL(CannedAccessControlList.PublicRead);
         InitiateMultipartUploadResult initResponse = amazonClient.initiateMultipartUpload(initRequest);
         long partSize = 5*(1L<<20);// Set part size to 5 MB.
         try {
