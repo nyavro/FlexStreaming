@@ -1,5 +1,5 @@
-<div id="{0}" onclick="initPlayer('{0}', {1}, {2}, {3})">
-    <a onclick="initPlayer()">Show comment</a>
+<div id="{0}" onclick="initPlayer('{0}', '{1}', {2}, {3})">
+    <span>Show comment</span>
 </div>
 <script type='text/javascript'>
     function initPlayer(id, url, width, height) {
