@@ -8,9 +8,13 @@ public class ThumbnailsExtractorService {
     private var video:Video;
     private var timer:Timer;
     private var thumbnails:Array;
+    private var extractWidth:int;
+    private var extractHeight:int;
 
-    public function ThumbnailsExtractorService(video:Video) {
+    public function ThumbnailsExtractorService(video:Video, extractWidth:int, extractHeight:int) {
         this.video = video;
+        this.extractWidth = extractWidth;
+        this.extractHeight = extractHeight;
     }
 
     public function start():void {
@@ -29,7 +33,7 @@ public class ThumbnailsExtractorService {
     }
 
     private function makeSnapshot(event:TimerEvent):void {
-        var bitmapData:BitmapData = new BitmapData(210, 120);
+        var bitmapData:BitmapData = new BitmapData(extractWidth, extractHeight);
         bitmapData.draw(video);
         thumbnails.push(bitmapData);
     }

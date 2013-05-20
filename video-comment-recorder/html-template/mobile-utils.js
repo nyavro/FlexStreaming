@@ -9,7 +9,9 @@
             embedWidth: 400,
             embedHeight: 200,
             videoMaxDuration: 20,
-            question: "{empty}"
+            question: "{empty}",
+            width: 640,
+            height: 480
         }
         var settings = $.extend({id: null}, defaults, options);
         var appUrl = settings.protocol+"://" + settings.host + ":" + settings.port + "/" + settings.app + "/api";
@@ -38,7 +40,7 @@
                 var attributes = {};
                 attributes.id = "swfPlaceholder";
                 attributes.name = "swfPlaceholder";
-                swfobject.embedSWF(settings.swfUrl, this.attr("id"), "100%", "100%", "9.0.124", "expressInstall.swf", flashvars, params, attributes);
+                swfobject.embedSWF(settings.swfUrl, this.attr("id"), settings.width, settings.height, "9.0.124", "expressInstall.swf", flashvars, params, attributes);
             }
             else {
                 this
