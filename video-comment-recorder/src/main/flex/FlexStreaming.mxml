@@ -26,6 +26,7 @@
 
         [Bindable]
         private var isUpload:Boolean = false;
+        [Bindable]
         private var isComplete:Boolean = false;
 
         [Bindable]
