@@ -89,27 +89,34 @@
         }
 
         private function startRecording():void {
+            currentState = 'record';
             ns = new NetStream(nc);
             ns.attachAudio(mic);
             ns.attachCamera(cam);
             ns.publish(videoId, "record");
-            this.video.attachCamera(cam);
+            video.attachCamera(cam);
             videoTimer.start(videoMaxDuration, stopRecording);
             thumbnailsExtractorService.start();
         }
 
         private function stopRecording():void {
-            currentState = 'selectThumbnail';
+            countDownSplash.stop();
             ns.attachCamera(null);
             ns.attachAudio(null);
             ns.close();
             video.attachCamera(null);
             videoTimer.stop();
-            updateThumbnails(thumbnailsExtractorService.stop());
+            thumbnailsExtractorService.stop();
+            var thumbnails:Array = thumbnailsExtractorService.getThumbnails();
+            if(thumbnails.length==0) {
+                currentState = 'start';
+            } else {
+                currentState = 'selectThumbnail';
+                updateThumbnails(thumbnails);
+            }
         }
 
         private function updateThumbnails(thumbnails:Array):void {
-            var thumbnails:Array = thumbnailsExtractorService.stop();
             if (thumbnails.length > 0) {
                 thumbnail0.source = new Bitmap(thumbnails[(int)((thumbnails.length * 1) / 8)]);
                 thumbnail1.source = new Bitmap(thumbnails[(int)((thumbnails.length * 3) / 8)]);
@@ -178,7 +185,7 @@
 
         private function startEffect():void {
             countDownSplash.start(startRecording, 3);
-            currentState = 'record';
+            currentState = 'countDown';
         }
 
         private function uploadVideo():void {
@@ -202,10 +209,11 @@
         <s:State name="play"/>
         <s:State name="done"/>
         <s:State name="upload"/>
+        <s:State name="countDown"/>
     </s:states>
     <s:SkinnableContainer>
         <mx:VBox horizontalAlign="center">
-            <s:SkinnableContainer id="playerSection" includeIn="start,record,done,upload" width="640" height="480" creationComplete="onReady()">
+            <s:SkinnableContainer id="playerSection" includeIn="start,record,done,upload,countDown" width="640" height="480" creationComplete="onReady()">
                 <mx:VBox horizontalAlign="center" verticalAlign="middle" width="100%" height="100%">
                     <util:VideoContainer id="videoContainer" height="100%" width="100%"/>
                 </mx:VBox>
@@ -222,19 +230,19 @@
                 </mx:VBox>
             </s:SkinnableContainer>
         </mx:VBox>
-        <mx:VBox width="640" height="480" verticalAlign="bottom">
-            <mx:HBox height="40" width="100%" verticalAlign="middle" horizontalAlign="center" backgroundColor="#000000" backgroundAlpha="0.3">
-                    <mx:Button id="recordButton" label.start="Record a Video" label.done="Re-record" includeIn="start, done" fontSize="18" fontWeight="bold" click="startEffect()" width="160"/>
-                    <mx:Button label="Stop" includeIn="record" fontSize="18" fontWeight="bold"  click="stopRecording()" width="160"/>
-                    <mx:Button label="Play" includeIn="done" fontSize="18" fontWeight="bold" click="playRecording()" width="160"/>
-                    <mx:Button label="Upload a Video" includeIn="start" fontSize="18" fontWeight="bold" click="uploadVideo()" width="160"/>
-                    <mx:Button label="Finish" includeIn="done" fontSize="18" fontWeight="bold" click="finishComment()" width="160"/>
+        <mx:VBox width="640" height="480" verticalAlign="bottom" verticalAlign.done="middle" paddingBottom="50" paddingBottom.done="0">
+            <mx:HBox height="40" width="100%" horizontalAlign="center" horizontalGap="40">
+                <mx:Button id="recordButton" label.start="Record a Video" label.done="Re-record" includeIn="start, done" click="startEffect()" fontSize="16" width="145" height="100%"/>
+                <mx:Button label="Stop" id="stop" includeIn="record" click="stopRecording()"  fontSize="16" width="145" height="100%"/>
+                <mx:Button label="Preview" includeIn="done" click="playRecording()"    fontSize="16" width="145" height="100%"/>
+                <mx:Button label="Upload a Video" includeIn="start" click="uploadVideo()" fontSize="16" width="145" height="100%"/>
+                <mx:Button label="Submit" includeIn="done" click="finishComment()"  fontSize="16" width="145" height="100%"/>
             </mx:HBox>
             <mx:ProgressBar id="uploadProgress" width="100%" mode="manual" includeIn="upload"/>
         </mx:VBox>
         <mx:VBox includeIn="selectThumbnail" horizontalAlign="center" width="640" height="480" backgroundColor="#808080" verticalGap="22">
             <mx:HBox width="100%" horizontalAlign="center">
-                <mx:Text text="Select your Thumbnail:" color="#FFFFFF" fontSize="20" textAlign="center"/>
+                <mx:Text text="Select your Thumbnail" color="#FFFFFF" fontSize="20" textAlign="center"/>
             </mx:HBox>
             <mx:HBox width="100%" paddingLeft="53" horizontalGap="22">
                 <mx:VBox click="submitThumbnail(thumbnail0)"><mx:Image id="thumbnail0"/></mx:VBox>

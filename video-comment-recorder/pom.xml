@@ -11,6 +11,7 @@
     <properties>
         <swf>video-comment-recorder-1.0.swf</swf>
         <host>localhost</host>
+        <flex.sdk.version>4.5.1.21328</flex.sdk.version>
     </properties>
 
     <profiles>
@@ -64,26 +65,13 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <!--<plugin>-->
-                <!--<artifactId>maven-clean-plugin</artifactId>-->
-                <!--<version>2.4</version>-->
-                <!--<configuration>-->
-                    <!--<filesets>-->
-                        <!--<fileset>-->
-                            <!--<directory>target</directory>-->
-                            <!--<followSymlinks>false</followSymlinks>-->
-                        <!--</fileset>-->
-                    <!--</filesets>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
         </plugins>
     </build>
     <dependencies>
         <dependency>
             <groupId>com.adobe.flex.framework</groupId>
             <artifactId>flex-framework</artifactId>
-            <version>4.5.1.21328</version>
+            <version>${flex.sdk.version}</version>
             <type>pom</type>
         </dependency>
     </dependencies>

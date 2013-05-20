@@ -20,13 +20,16 @@ public class ThumbnailsExtractorService {
         timer.addEventListener(TimerEvent.TIMER, makeSnapshot);
     }
 
-    public function stop():Array {
+    public function stop():void {
         timer.stop();
+    }
+
+    public function getThumbnails():Array {
         return thumbnails;
     }
 
     private function makeSnapshot(event:TimerEvent):void {
-        var bitmapData:BitmapData = new BitmapData(video.width*0.4, video.height*0.4);
+        var bitmapData:BitmapData = new BitmapData(210, 120);
         bitmapData.draw(video);
         thumbnails.push(bitmapData);
     }
