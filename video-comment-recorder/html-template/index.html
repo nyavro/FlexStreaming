@@ -8,7 +8,7 @@
             $(function () {
                 $.get('embed.txt',
                     function(embed){
-                        $("#test").videocomment({host:"${host}", swfUrl:"${swf}", width:640, height:480, embedWidth:480, embedHeight:270, videoMaxDuration: 30, question: "What our Clients think?", embedTemplate:encodeURIComponent(embed)});
+                        $("#test").videocomment({host:"${host}", videourl: "${videourl}", swfUrl:"${swf}", width:640, height:480, embedWidth:480, embedHeight:270, videoMaxDuration: 30, question: "What our Clients think?", embedTemplate:encodeURIComponent(embed)});
                     }
                 );
             })

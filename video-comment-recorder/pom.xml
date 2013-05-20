@@ -11,6 +11,7 @@
     <properties>
         <swf>video-comment-recorder-1.0.swf</swf>
         <host>localhost</host>
+        <videourl>http://d3le95o851s7aa.cloudfront.net</videourl>
         <flex.sdk.version>4.5.1.21328</flex.sdk.version>
     </properties>
 

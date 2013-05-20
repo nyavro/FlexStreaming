@@ -2,6 +2,7 @@
     $.fn.videocomment = function (options) {
         var defaults = {
             host: "localhost",
+            videourl: "http://localhost",
             protocol: "http",
             port: "8080",
             app: "videocomments",
@@ -23,6 +24,7 @@
                 var flashvars = {};
                 flashvars.liveUrl = liveUrl;
                 flashvars.servletUrl = appUrl;
+                flashvars.videoUrl = settings.videourl;
                 flashvars.videoMaxDuration = settings.videoMaxDuration;
                 flashvars.embedWidth = settings.embedWidth;
                 flashvars.embedHeight = settings.embedHeight;
