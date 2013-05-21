@@ -1,8 +1,6 @@
-// TODO get rid off global variables: such as id
-// TODO To be reviewed
 (function ($) {
     $.fn.videocomments = function (options) {
-        var defaults = {
+        var settings = {
             host: "localhost",
             videourl: "http://localhost",
             protocol: "http",
@@ -15,12 +13,13 @@
             question: "Please record your comment",
             width: 640,
             height: 480
-        }
-        var settings = $.extend({id: null}, defaults, options); // TODO why the first attribute?
+        };
+        $.extend(settings, options);
         var appUrl = settings.protocol+"://" + settings.host + ":" + settings.port + "/" + settings.app + "/api";
         var liveUrl = "rtmp://" + settings.host + "/" + settings.app + "/";
         settings.url = appUrl;
         this.settings = settings;
+        this.id = null; //TODO
         if(!isMobile()) {
             if(isFlashEnabled()) {
                 var flashvars = {};
@@ -74,7 +73,7 @@
         xhr.send(data);
         obj.videoSent = true;
         finish(obj);
-    };
+    }
 
     function handleThumbnailSelect(obj, evt) {
         //console.log(evt);
@@ -86,7 +85,7 @@
         xhr.send(data);
         obj.thumbnailSent = true;
         finish(obj);
-    };
+    }
 
     function finish(obj) {
         if(obj.thumbnailSent && obj.videoSent) {
@@ -101,7 +100,7 @@
             url: obj.settings.url + '/create',
             success: function (data) {id = data;}
         });
-    };
+    }
 
     if (!String.prototype.format) {
         String.prototype.format = function() {
@@ -113,14 +112,14 @@
                     ;
             });
         };
-    };
+    }
 
     function isMobile(){
         return window.screen.width*window.screen.height/Math.pow((window.devicePixelRatio == undefined || navigator.userAgent.match(/(iPhone|iPod|iPad)/i) ? 1 : window.devicePixelRatio),2) < 480000;
-    };
+    }
 
     function isFlashEnabled(){
         return ((typeof navigator.plugins != "undefined" && typeof navigator.plugins["Shockwave Flash"] == "object") || (window.ActiveXObject && (new ActiveXObject("ShockwaveFlash.ShockwaveFlash")) != false));
-    };
+    }
 
 }(jQuery));
