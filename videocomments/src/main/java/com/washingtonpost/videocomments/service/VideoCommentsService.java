@@ -62,11 +62,12 @@ public class VideoCommentsService {
         this.amazonService = amazonService;
     }
 
-    public void addVideo(UUID uuid) {
+    public void addVideo(UUID uuid, String format) {
         VideoComment videoComment = videoCommentsDao.load(uuid);
         if (!videoComment.isComplete()) {
             videoComment.setHasVideo(true);
             videoComment.setUpdatedAt(new Date());
+            videoComment.setFormat(format);
             videoCommentsDao.update(videoComment);
         }
     }

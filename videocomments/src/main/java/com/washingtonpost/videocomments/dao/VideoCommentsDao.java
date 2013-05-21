@@ -38,13 +38,14 @@ public class VideoCommentsDao {
                 comment.setCreatedAt(timestamp);
                 comment.setUpdatedAt(timestamp);
                 PreparedStatement pst = con.prepareStatement(
-                        "insert into VIDEO_COMMENTS (CREATED_AT, UPDATED_AT, VIDEO, THUMBNAIL, COMPLETE)" +
-                                " values (?, ?, ?, ?, ?) ", new String[]{"id"});
+                        "insert into VIDEO_COMMENTS (CREATED_AT, UPDATED_AT, FORMAT, VIDEO, THUMBNAIL, COMPLETE)" +
+                                " values (?, ?, ?, ?, ?, ?) ", new String[]{"id"});
                 pst.setTimestamp(1, timestamp);
                 pst.setTimestamp(2, timestamp);
-                pst.setInt(3, comment.isHasVideo() ? 1: 0);
-                pst.setInt(4, comment.isHasThumbnail() ? 1: 0);
-                pst.setInt(5, comment.isComplete() ? 1: 0);
+                pst.setString(3, comment.getFormat());
+                pst.setInt(4, comment.isHasVideo() ? 1: 0);
+                pst.setInt(5, comment.isHasThumbnail() ? 1: 0);
+                pst.setInt(6, comment.isComplete() ? 1: 0);
                 return pst;
             }
         };
@@ -57,9 +58,10 @@ public class VideoCommentsDao {
 
     public boolean update(VideoComment comment) {
         Assert.notNull(comment.getId());
-        int count = jdbcTemplate.update("update VIDEO_COMMENTS set UPDATED_AT = ?, VIDEO = ?, THUMBNAIL = ?, COMPLETE = ? where ID = ?",
+        int count = jdbcTemplate.update("update VIDEO_COMMENTS set UPDATED_AT = ?, FORMAT = ?, VIDEO = ?, THUMBNAIL = ?, COMPLETE = ? where ID = ?",
                 new Object[]{
                         comment.getUpdatedAt(),
+                        comment.getFormat(),
                         comment.isHasVideo() ? 1: 0,
                         comment.isHasThumbnail() ? 1: 0,
                         comment.isComplete() ? 1: 0,
@@ -102,6 +104,7 @@ public class VideoCommentsDao {
         public VideoComment mapRow(ResultSet resultSet, int i) throws SQLException {
             VideoComment record = new VideoComment();
             record.setId((UUID) resultSet.getObject("ID"));
+            record.setFormat(resultSet.getString("FORMAT"));
             record.setCreatedAt(resultSet.getTimestamp("CREATED_AT"));
             record.setUpdatedAt(resultSet.getTimestamp("UPDATED_AT"));
             record.setHasVideo(resultSet.getBoolean("VIDEO"));

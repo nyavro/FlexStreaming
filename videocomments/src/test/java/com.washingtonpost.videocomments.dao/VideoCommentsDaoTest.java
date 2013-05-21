@@ -45,6 +45,7 @@ public class VideoCommentsDaoTest extends AbstractTestNGSpringContextTests {
 
     private VideoComment newVideoComment(String name) {
         VideoComment comment = new VideoComment();
+        comment.setFormat("mp4");
         comment.setComplete(false);
         comment.setHasVideo(true);
         comment.setHasThumbnail(true);

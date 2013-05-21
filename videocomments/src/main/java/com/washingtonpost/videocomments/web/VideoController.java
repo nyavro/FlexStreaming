@@ -12,15 +12,20 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
+import org.red5.logging.Red5LoggerFactory;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.DefaultMultipartHttpServletRequest;
 
 @Controller
 public class VideoController {
+
+    private Logger log = Red5LoggerFactory.getLogger(VideoController.class);
 
     @Autowired
     private VideoCommentsService videoCommentsService;
@@ -119,11 +124,28 @@ public class VideoController {
         OutputStream fileOutputStream = null;
         try {
             fileOutputStream = new FileOutputStream(file);
-            final InputStream filedata = ((DefaultMultipartHttpServletRequest) request).getFile("Filedata").getInputStream();
+            MultipartFile multipartFile = ((DefaultMultipartHttpServletRequest) request).getFile("Filedata");
+            String originalName = multipartFile.getOriginalFilename();
+            log.debug("Upload video file: " + originalName);
+            String format = getFormat(originalName);
+            final InputStream filedata = multipartFile.getInputStream();
             IOUtils.copy(filedata, fileOutputStream);
-            videoCommentsService.addVideo(uuid);
+            videoCommentsService.addVideo(uuid, format);
         } finally {
             IOUtils.closeQuietly(fileOutputStream);
+        }
+    }
+
+    private String getFormat(String originalName) {
+        originalName = originalName.toLowerCase();
+        if (originalName.endsWith(".mp4")) {
+            return "mp4";
+        } else if (originalName.endsWith(".flv")) {
+            return "flv";
+        } else if (originalName.endsWith(".3gp")) {
+            return "3gp";
+        } else {
+            throw new RuntimeException("Unknow video format: " + originalName);
         }
     }
 

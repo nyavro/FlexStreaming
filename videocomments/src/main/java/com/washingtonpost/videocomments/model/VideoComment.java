@@ -6,6 +6,8 @@ import java.util.UUID;
 public class VideoComment {
 
     private UUID id;
+
+    private String format;
     private boolean hasVideo;
     private boolean hasThumbnail;
 
@@ -19,6 +21,14 @@ public class VideoComment {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public String getFormat() {
+        return format;
+    }
+
+    public void setFormat(String format) {
+        this.format = format;
     }
 
     public boolean isComplete() {
@@ -73,6 +83,7 @@ public class VideoComment {
         if (hasVideo != that.hasVideo) return false;
         if (createdAt != null ? !createdAt.equals(that.createdAt) : that.createdAt != null) return false;
         if (id != null ? !id.equals(that.id) : that.id != null) return false;
+        if (format != null ? !format.equals(that.format) : that.format != null) return false;
         if (updatedAt != null ? !updatedAt.equals(that.updatedAt) : that.updatedAt != null) return false;
 
         return true;
@@ -81,6 +92,7 @@ public class VideoComment {
     @Override
     public int hashCode() {
         int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (format != null ? format.hashCode() : 0);
         result = 31 * result + (hasVideo ? 1 : 0);
         result = 31 * result + (hasThumbnail ? 1 : 0);
         result = 31 * result + (complete ? 1 : 0);
