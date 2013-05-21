@@ -38,6 +38,7 @@
         private var thumbnailsExtractorService:ThumbnailsExtractorService;
         private var communicationService:CommunicationService;
         private var videoId:String;
+        private var videoFormat:String;
         private var servletUrl:String;
         private const padding:int = 15;
         [Bindable]
@@ -94,6 +95,7 @@
 
         private function startRecording():void {
             currentState = 'record';
+            videoFormat = "flv";
             ns = new NetStream(nc);
             ns.attachAudio(mic);
             ns.attachCamera(cam);
@@ -190,16 +192,24 @@
             currentState = 'countDown';
         }
 
+        private function uploadDone(serverFileRef:String) {
+            if (serverFileRef != null) {
+                var idx:int = serverFileRef.lastIndexOf(".");
+                videoFormat = serverFileRef.substr(idx + 1, serverFileRef.length - idx - 1)
+            }
+            switchToDone();
+        }
+
         private function uploadVideo():void {
             currentState = 'upload';
             isUpload = true;
-            new VideoUploadHelper(servletUrl, videoId, uploadProgress.setProgress, switchToDone).upload();
+            new VideoUploadHelper(servletUrl, videoId, uploadProgress.setProgress, uploadDone).upload();
         }
 
         private function finishComment():void {
             communicationService.complete(videoId);
             if (ExternalInterface.available) {
-                ExternalInterface.call(finishCallback, videoId);
+                ExternalInterface.call(finishCallback, videoId, videoFormat);
             } else {
                 Alert.show("ExternalInterface is not available!");
             }

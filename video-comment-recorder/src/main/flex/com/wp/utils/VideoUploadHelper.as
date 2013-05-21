@@ -1,5 +1,5 @@
 package com.wp.utils {
-import flash.errors.IllegalOperationError;
+import flash.events.DataEvent;
 import flash.events.Event;
 import flash.events.ProgressEvent;
 import flash.net.FileFilter;
@@ -12,7 +12,7 @@ import mx.controls.ProgressBar;
 
 public class VideoUploadHelper {
 
-    private static const videoTypes:Array = [new FileFilter("Video files", "*.flv;*.mp4;*.mpg;*.avi")];
+    private static const videoTypes:Array = [new FileFilter("Video files", "*.flv;*.mp4;*.webm;*.3gp")];
     private var fileReference:FileReference = new FileReference();
     private var url:String;
     private var id:String;
@@ -22,7 +22,8 @@ public class VideoUploadHelper {
 
     public function VideoUploadHelper(url:String, id:String, progressHandler:Function, completionHandler:Function) {
         fileReference.addEventListener(Event.SELECT, selectionHandler);
-        fileReference.addEventListener(Event.COMPLETE, onComplete);
+//        fileReference.addEventListener(Event.COMPLETE, onComplete);
+        fileReference.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, uploadDataComplete);
         fileReference.addEventListener(Event.CLOSE, onComplete);
         fileReference.addEventListener(Event.CANCEL, onComplete);
         fileReference.addEventListener(ProgressEvent.PROGRESS, onProgress);
@@ -46,12 +47,16 @@ public class VideoUploadHelper {
             fileReference.upload(request);
         } catch (error:Error) {
             Alert.show(error.message);
-            completionHandler();
+            completionHandler(null);
         }
     }
 
+    public function uploadDataComplete(event:DataEvent):void {
+        completionHandler(event.data);
+    }
+
     private function onComplete(event:Event):void {
-        completionHandler();
+        completionHandler(null);
     }
 }
 }

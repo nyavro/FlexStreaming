@@ -125,7 +125,7 @@ public class VideoController {
             MultipartFile multipartFile = ((DefaultMultipartHttpServletRequest) request).getFile("Filedata");
             String originalName = multipartFile.getOriginalFilename();
             String format = getFormat(originalName);
-
+            comment.setFormat(format);
             File file = new File(videoCommentsService.getPath(), id + "." + format);
             fileOutputStream = new FileOutputStream(file);
             log.debug("Upload video file: " + originalName);
@@ -136,6 +136,7 @@ public class VideoController {
         } finally {
             IOUtils.closeQuietly(fileOutputStream);
         }
+        response.getWriter().write(id + "." + comment.getFormat());
     }
 
     private String getFormat(String originalName) {

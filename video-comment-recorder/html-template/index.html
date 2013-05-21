@@ -5,13 +5,13 @@
         <script type="text/javascript" src="swfobject.js"></script>
         <script type="text/javascript" src="jquery.video-comments.plugin.js"></script>
         <script type="text/javascript">
-            function finish(videoId) {
+            function finish(videoId, videoFormat) {
                 $.get('embed.txt',
                     function(embed){
 //                        var embedWidth = 480;
 //                        var embedHeight = 270;
                         var videourl = "${videourl}";
-                        alert(embed.format(videoId.replace(/-/g, ''), videourl, videoId));
+                        alert(embed.format(videoId.replace(/-/g, ''), videourl, videoId, videoFormat));
                     }
                 );
             }

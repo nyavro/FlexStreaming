@@ -2,8 +2,8 @@
  <script type="text/javascript">
     function showcomment{0}() {
         jwplayer("comment{0}").setup({
-            file: "{2}/{1}.flv",
-            image: "{2}/{1}.jpg"
+            file: "{1}/{2}.{3}",
+            image: "{1}/{2}.jpg"
         });
     }
 </script>
