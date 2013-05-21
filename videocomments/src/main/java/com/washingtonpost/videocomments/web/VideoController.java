@@ -120,14 +120,16 @@ public class VideoController {
         if (comment.isComplete()) {
             throw new IllegalArgumentException("Is complete");
         }
-        File file = new File(videoCommentsService.getPath(), id + ".flv");
         OutputStream fileOutputStream = null;
         try {
-            fileOutputStream = new FileOutputStream(file);
             MultipartFile multipartFile = ((DefaultMultipartHttpServletRequest) request).getFile("Filedata");
             String originalName = multipartFile.getOriginalFilename();
-            log.debug("Upload video file: " + originalName);
             String format = getFormat(originalName);
+
+            File file = new File(videoCommentsService.getPath(), id + "." + format);
+            fileOutputStream = new FileOutputStream(file);
+            log.debug("Upload video file: " + originalName);
+
             final InputStream filedata = multipartFile.getInputStream();
             IOUtils.copy(filedata, fileOutputStream);
             videoCommentsService.addVideo(uuid, format);
@@ -144,8 +146,10 @@ public class VideoController {
             return "flv";
         } else if (originalName.endsWith(".3gp")) {
             return "3gp";
+        } else if (originalName.endsWith(".webm")) {
+            return "webm";
         } else {
-            throw new RuntimeException("Unknow video format: " + originalName);
+            throw new RuntimeException("Unknown video format: " + originalName);
         }
     }
 

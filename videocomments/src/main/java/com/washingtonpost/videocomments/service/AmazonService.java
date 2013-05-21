@@ -22,7 +22,7 @@ public class AmazonService {
         this.bucket = bucket;
     }
 
-    public void upload(InputStream stream, String target, long contentLength) {
+    public void upload(InputStream stream, String target, long contentLength, String contentType) {
         List<PartETag> partETags = new ArrayList<PartETag>();
         InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(bucket, target);
         ObjectMetadata metadata = new ObjectMetadata();

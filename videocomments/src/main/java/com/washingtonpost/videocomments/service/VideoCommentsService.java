@@ -93,12 +93,12 @@ public class VideoCommentsService {
 
         @Override
         public void run() {
-            File videoFile = new File(path, videoComment.getId().toString() + ".flv");
+            File videoFile = new File(path, videoComment.getId().toString() + "." + videoComment.getFormat());
             File thumbnailFile = new File(path, videoComment.getId().toString() + ".jpg");
             String publishname = videoComment.getId().toString();
             try {
-                uploadFile(videoFile, publishname + ".flv");
-                uploadFile(thumbnailFile, publishname + ".jpg");
+                uploadFile(videoFile, publishname + "." + videoComment.getFormat(), "video/" + videoComment.getFormat());
+                uploadFile(thumbnailFile, publishname + ".jpg", "image/jpeg");
 //                videoFile.delete();
 //                thumbnailFile.delete();
                 //delete files
@@ -111,12 +111,12 @@ public class VideoCommentsService {
             }
         }
 
-        private void uploadFile(File file, String key) throws IOException {
+        private void uploadFile(File file, String key, String contentType) throws IOException {
             FileInputStream fileInputStream = null;
             try {
                 if (file.exists() && file.isFile()) {
                     fileInputStream = new FileInputStream(file);
-                    amazonService.upload(fileInputStream, key, file.length());
+                    amazonService.upload(fileInputStream, key, file.length(), contentType);
                 }
             } catch (IOException e) {
                 IOUtils.closeQuietly(fileInputStream);
