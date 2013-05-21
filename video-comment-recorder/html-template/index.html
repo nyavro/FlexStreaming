@@ -6,19 +6,22 @@
         <script type="text/javascript" src="jquery.video-comments.plugin.js"></script>
         <script type="text/javascript">
             function finish(videoId) {
-                alert("Js result: " + videoId);
-            }
-            $(function () {
                 $.get('embed.txt',
                     function(embed){
-                        $("#test").videocomments({finishCallback: "finish", host:"${host}", videourl: "${videourl}", swfUrl:"${swf}", width:640, height:480, embedWidth:480, embedHeight:270, videoMaxDuration: 30, question: "Please record or upload your video comment", embedTemplate:encodeURIComponent(embed)});
+//                        var embedWidth = 480;
+//                        var embedHeight = 270;
+                        var videourl = "${videourl}";
+                        alert(embed.format(videoId.replace(/-/g, ''), videourl, videoId));
                     }
                 );
+            }
+            $(function () {
+                $("#test").videocomments({finishCallback: "finish", host:"${host}", swfUrl:"${swf}", width:640, height:480, videoMaxDuration: 30, question: "Please record or upload your video comment"});
             })
         </script>
     </head>
 
     <body style="margin: 0px;" width="700" height="380">
-        <div id="test" width="700" height="380"/>
+        <div id="test"/>
     </body>
 </html>

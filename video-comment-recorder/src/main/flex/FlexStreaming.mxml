@@ -22,7 +22,6 @@
         private var ns:NetStream;
         private var video:Video;
         private var liveUrl:String;
-        private var videoUrl:String;
 
         [Bindable]
         private var isUpload:Boolean = false;
@@ -39,8 +38,6 @@
         private var thumbnailsExtractorService:ThumbnailsExtractorService;
         private var communicationService:CommunicationService;
         private var videoId:String;
-        private var embedWidth:int;
-        private var embedHeight:int;
         private var servletUrl:String;
         private const padding:int = 15;
         [Bindable]
@@ -74,9 +71,6 @@
 
         private function init():void {
             liveUrl = FlexGlobals.topLevelApplication.parameters.liveUrl;
-            videoUrl = FlexGlobals.topLevelApplication.parameters.videoUrl;
-            embedWidth = FlexGlobals.topLevelApplication.parameters.embedWidth;
-            embedHeight = FlexGlobals.topLevelApplication.parameters.embedHeight;
             videoMaxDuration = FlexGlobals.topLevelApplication.parameters.videoMaxDuration;
             servletUrl = FlexGlobals.topLevelApplication.parameters.servletUrl;
             question = FlexGlobals.topLevelApplication.parameters.question;

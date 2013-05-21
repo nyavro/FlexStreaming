@@ -1,15 +1,23 @@
+if (!String.prototype.format) {
+    String.prototype.format = function() {
+        var args = arguments;
+        return this.replace(/{(\d+)}/g, function(match, number) {
+            return typeof args[number] != 'undefined'
+                ? args[number]
+                : match
+                ;
+        });
+    };
+}
 function defaultFinish(arg) {}
 (function ($) {
     $.fn.videocomments = function (options) {
         var settings = {
             host: "localhost",
-            videourl: "http://localhost",
             protocol: "http",
             port: "8080",
             app: "videocomments",
             swfUrl: "video-comment-recorder-1.0.swf",
-            embedWidth: 400,
-            embedHeight: 200,
             videoMaxDuration: 20,
             question: "Please record your comment",
             width: 640,
@@ -27,12 +35,8 @@ function defaultFinish(arg) {}
                 var flashvars = {};
                 flashvars.liveUrl = liveUrl;
                 flashvars.servletUrl = appUrl;
-                flashvars.videoUrl = settings.videourl;
                 flashvars.videoMaxDuration = settings.videoMaxDuration;
-                flashvars.embedWidth = settings.embedWidth;
-                flashvars.embedHeight = settings.embedHeight;
                 flashvars.question = settings.question;
-                flashvars.embedTemplate = settings.embedTemplate;
                 flashvars.finishCallback = settings.finishCallback;
                 var params = {};
                 params.menu = "false";
@@ -103,18 +107,6 @@ function defaultFinish(arg) {}
             url: obj.settings.url + '/create',
             success: function (data) {id = data;}
         });
-    }
-
-    if (!String.prototype.format) {
-        String.prototype.format = function() {
-            var args = arguments;
-            return this.replace(/{(\d+)}/g, function(match, number) {
-                return typeof args[number] != 'undefined'
-                    ? args[number]
-                    : match
-                    ;
-            });
-        };
     }
 
     function isMobile(){
