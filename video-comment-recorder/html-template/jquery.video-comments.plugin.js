@@ -59,7 +59,9 @@ function defaultFinish(arg) {}
             }
         }
         else {
-            this.append("<input type='file' name='file' capture accept='video/*.mp4'/>");
+            this.append("Select video");
+            this.append("<input type='file' name='file' capture accept='video/*.mp4'/><br>");
+            this.append("Select thumbnail");
             this.append("<input type='file' name='thumbnail' accept='image/*'/>");
             getRequestId(this);
             var self = this;
@@ -76,7 +78,7 @@ function defaultFinish(arg) {}
 	    var file = $("input[name='file']", obj)[0].files[0];
         data.append('Filedata', file);
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', obj.settings.url + "/video?id=" + id, true);
+        xhr.open('POST', obj.settings.url + "/video?id=" + obj.id, true);
         xhr.send(data);
         obj.videoSent = true;
         finish(obj);
@@ -88,7 +90,7 @@ function defaultFinish(arg) {}
         var file = $("input[name='thumbnail']", obj)[0].files[0];
         data.append('Filedata', file);
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', obj.settings.url + "/thumbnail?id=" + id, true);
+        xhr.open('POST', obj.settings.url + "/thumbnail?id=" + obj.id, true);
         xhr.send(data);
         obj.thumbnailSent = true;
         finish(obj);
@@ -97,7 +99,7 @@ function defaultFinish(arg) {}
     function finish(obj) {
         if(obj.thumbnailSent && obj.videoSent) {
             $.ajax({
-                url: obj.settings.url + '/complete'
+                url: obj.settings.url + '/complete?id=' + obj.id
             });
         }
     }
@@ -105,7 +107,7 @@ function defaultFinish(arg) {}
     function getRequestId(obj) {
         $.ajax({
             url: obj.settings.url + '/create',
-            success: function (data) {id = data;}
+            success: function (data) {obj.id = data;}
         });
     }
 

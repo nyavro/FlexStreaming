@@ -104,8 +104,15 @@ public class VideoController {
         }
         FileOutputStream fileOutputStream = null;
         try {
+            InputStream inputStream = null;
+            if (request instanceof DefaultMultipartHttpServletRequest) {
+                MultipartFile multipartFile = ((DefaultMultipartHttpServletRequest) request).getFile("Filedata");
+                inputStream = multipartFile.getInputStream();
+            } else {
+                inputStream = request.getInputStream();
+            }
             fileOutputStream = new FileOutputStream(file);
-            IOUtils.copy(request.getInputStream(), fileOutputStream);
+            IOUtils.copy(inputStream, fileOutputStream);
             videoCommentsService.addThumbnail(uuid);
         } finally {
             IOUtils.closeQuietly(fileOutputStream);
