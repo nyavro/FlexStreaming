@@ -99,8 +99,19 @@
             ns.attachCamera(cam);
             ns.publish(videoId, "record");
             video.attachCamera(cam);
-            videoTimer.start(videoMaxDuration, stopRecording);
+            videoTimer.start(videoMaxDuration, onStop);
             thumbnailsExtractorService.start();
+        }
+
+        private function onStop(): void {
+            stopRecording();
+            var thumbnails:Array = thumbnailsExtractorService.getThumbnails();
+            if(thumbnails.length==0) {
+                currentState = 'start';
+            } else {
+                currentState = 'selectThumbnail';
+                updateThumbnails(thumbnails);
+            }
         }
 
         private function stopRecording():void {
@@ -111,13 +122,6 @@
             video.attachCamera(null);
             videoTimer.stop();
             thumbnailsExtractorService.stop();
-            var thumbnails:Array = thumbnailsExtractorService.getThumbnails();
-            if(thumbnails.length==0) {
-                currentState = 'start';
-            } else {
-                currentState = 'selectThumbnail';
-                updateThumbnails(thumbnails);
-            }
         }
 
         private function updateThumbnails(thumbnails:Array):void {
@@ -181,6 +185,7 @@
         }
 
         private function startEffect():void {
+            videoTimer.time = videoMaxDuration;
             countDownSplash.start(startRecording, 3);
             currentState = 'countDown';
         }
@@ -200,6 +205,17 @@
             }
             currentState = 'done';
             isComplete = true;
+        }
+
+        private function onCloseRecording():void {
+            stopRecording();
+            currentState = 'start';
+            videoTimer.time = videoMaxDuration;
+        }
+
+        private function onClose():void {
+            currentState = 'start';
+            videoTimer.time = videoMaxDuration;
         }
         ]]></fx:Script>
     <s:states>
@@ -230,7 +246,7 @@
             <mx:HBox height="8%" width="100%" horizontalAlign="center" horizontalGap="{width/16}">
                 <mx:Button id="recordButton" label.start="Record a Video" label.done="Re-record" includeIn="start, done"
                            visible="{isUpload == false}" includeInLayout="{recordButton.visible}" enabled="{!isComplete}" click="startEffect()" fontSize="{width/40}" width="25%" height="100%"/>
-                <mx:Button label="Stop" id="stop" includeIn="record" click="stopRecording()"  fontSize="{width/40}" width="25%" height="100%"/>
+                <mx:Button label="Stop" id="stop" includeIn="record" click="onStop()"  fontSize="{width/40}" width="25%" height="100%"/>
                 <mx:Button label="Preview" includeIn="done" click="playRecording()"
                            visible="{isUpload == false}" includeInLayout="{recordButton.visible}" fontSize="{width/40}" width="25%" height="100%"/>
                 <mx:Button label="Upload a Video" includeIn="start" click="uploadVideo()" fontSize="{width/40}" width="25%" height="100%"/>
@@ -254,5 +270,8 @@
             </mx:HBox>
         </mx:VBox>
         <mx:Text includeIn="selectThumbnail" text="Select your Thumbnail" color="#FFFFFF" fontSize="{width/32}" textAlign="center" width="100%" height="10%"/>
+        <mx:Box includeIn="record,upload,selectThumbnail,play" width="100%" height="8%" verticalAlign="top" horizontalAlign="right" paddingTop="{height/20}" paddingRight="{height/20}">
+            <mx:Button label="Close" click.record="onCloseRecording()" click="onClose()"  fontSize="{width/40}" width="15%" height="100%"/>
+        </mx:Box>
     </s:SkinnableContainer>
 </s:Application>

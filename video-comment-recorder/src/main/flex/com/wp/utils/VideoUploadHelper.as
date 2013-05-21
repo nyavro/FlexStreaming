@@ -32,7 +32,7 @@ public class VideoUploadHelper {
         this.completionHandler = completionHandler;
     }
 
-    public function upload() {
+    public function upload():void {
         fileReference.browse(videoTypes);
     }
 
