@@ -18,9 +18,9 @@
         <slf4j.version>1.7.2</slf4j.version>
         <jackson.version>2.1.1</jackson.version>
 
-        <amazon.accesskey>AKIAI6YUW4LX3SRSCOAA</amazon.accesskey>
-        <amazon.secretkey>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</amazon.secretkey>
-        <amazon.bucket>video-archiver</amazon.bucket>
+        <amazon.accesskey>AKIAIVVLPDMK6CJSZCNA</amazon.accesskey>
+        <amazon.secretkey>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</amazon.secretkey>
+        <amazon.bucket>wps-test</amazon.bucket>
     </properties>
 
     <profiles>

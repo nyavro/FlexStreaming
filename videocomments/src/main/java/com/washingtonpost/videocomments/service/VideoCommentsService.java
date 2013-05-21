@@ -93,7 +93,7 @@ public class VideoCommentsService {
         @Override
         public void run() {
             File videoFile = new File(path, videoComment.getId().toString() + ".flv");
-            File thumbnailFile = new File(path, videoComment.getId().toString() + ".flv");
+            File thumbnailFile = new File(path, videoComment.getId().toString() + ".jpg");
             String publishname = videoComment.getId().toString();
             try {
                 uploadFile(videoFile, publishname + ".flv");

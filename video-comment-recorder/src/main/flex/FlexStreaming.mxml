@@ -23,9 +23,11 @@
         private var ns:NetStream;
         private var video:Video;
         private var liveUrl:String;
+        private var videoUrl:String;
 
         [Bindable]
         private var isUpload:Boolean = false;
+        [Bindable]
         private var isComplete:Boolean = false;
 
         [Bindable]
@@ -69,6 +71,7 @@
 
         private function init():void {
             liveUrl = FlexGlobals.topLevelApplication.parameters.liveUrl;
+            videoUrl = FlexGlobals.topLevelApplication.parameters.videoUrl;
             embedWidth = FlexGlobals.topLevelApplication.parameters.embedWidth;
             embedHeight = FlexGlobals.topLevelApplication.parameters.embedHeight;
             videoMaxDuration = FlexGlobals.topLevelApplication.parameters.videoMaxDuration;
@@ -192,7 +195,8 @@
         private function finishComment():void {
             communicationService.complete(videoId);
             var wind:EmbedCodeWindow = new EmbedCodeWindow();
-            wind.embedCode = StringUtil.substitute(embedTemplate, [videoId, servletUrl, embedWidth, embedHeight]);
+            var shortVideoId:String = videoId.replace(/-/g, '');
+            wind.embedCode = StringUtil.substitute(embedTemplate, [shortVideoId, videoId, videoUrl, embedWidth, embedHeight]);
             PopUpManager.addPopUp(wind, this, true);
             PopUpManager.centerPopUp(wind);
             currentState = 'done';
