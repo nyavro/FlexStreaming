@@ -5,10 +5,13 @@
         <script type="text/javascript" src="swfobject.js"></script>
         <script type="text/javascript" src="jquery.video-comments.plugin.js"></script>
         <script type="text/javascript">
+            function finish(videoId) {
+                alert("Js result: " + videoId);
+            }
             $(function () {
                 $.get('embed.txt',
                     function(embed){
-                        $("#test").videocomment({host:"${host}", videourl: "${videourl}", swfUrl:"${swf}", width:640, height:480, embedWidth:480, embedHeight:270, videoMaxDuration: 30, question: "What our Clients think?", embedTemplate:encodeURIComponent(embed)});
+                        $("#test").videocomments({finishCallback: "finish", host:"${host}", videourl: "${videourl}", swfUrl:"${swf}", width:640, height:480, embedWidth:480, embedHeight:270, videoMaxDuration: 30, question: "Please record or upload your video comment", embedTemplate:encodeURIComponent(embed)});
                     }
                 );
             })

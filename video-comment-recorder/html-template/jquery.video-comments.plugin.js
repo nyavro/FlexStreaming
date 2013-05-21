@@ -1,3 +1,4 @@
+function defaultFinish(arg) {}
 (function ($) {
     $.fn.videocomments = function (options) {
         var settings = {
@@ -12,7 +13,8 @@
             videoMaxDuration: 20,
             question: "Please record your comment",
             width: 640,
-            height: 480
+            height: 480,
+            finishCallback: "defaultFinish"
         };
         $.extend(settings, options);
         var appUrl = settings.protocol+"://" + settings.host + ":" + settings.port + "/" + settings.app + "/api";
@@ -31,6 +33,7 @@
                 flashvars.embedHeight = settings.embedHeight;
                 flashvars.question = settings.question;
                 flashvars.embedTemplate = settings.embedTemplate;
+                flashvars.finishCallback = settings.finishCallback;
                 var params = {};
                 params.menu = "false";
                 params.quality = "best";
